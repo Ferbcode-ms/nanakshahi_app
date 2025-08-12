@@ -9,6 +9,8 @@ import { getDeviceInfo } from "../utils/deviceCompatibility";
 import HomeScreen from "../screens/HomeScreen";
 import CalendarScreen from "../screens/CalendarScreen";
 import ConverterScreen from "../screens/ConverterScreen";
+import EventsScreen from "../screens/EventsScreen";
+import SettingsScreen from "../screens/SettingsScreen";
 import { RootStackParamList } from "../types";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -27,42 +29,44 @@ const AppNavigator: React.FC = () => {
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={{
+          headerShown: false,
+          tabBarHideOnKeyboard: true,
           tabBarStyle: {
-            backgroundColor: theme === "dark" ? "#2a2a2a" : "#ffffff",
-            borderTopColor: theme === "dark" ? "#3a3a3a" : "#e0e0e0",
-            borderTopWidth: 1,
-            paddingBottom: Platform.OS === "ios" ? insets.bottom : 10,
-            paddingTop: 0,
-            height: Platform.OS === "ios" ? 80 + insets.bottom : 70,
+            backgroundColor: theme === "dark" ? "#1f1f1f" : "#ffffff",
+            borderTopColor: "transparent",
+            borderTopWidth: 0,
+            paddingBottom:
+              Platform.OS === "ios" ? Math.max(insets.bottom, 8) : 10,
+
+            height:
+              Platform.OS === "ios" ? 70 + Math.max(insets.bottom, 8) : 64,
             position: "absolute",
-            bottom: bottomOffset,
-            left: 0,
-            right: 0,
-            elevation: 8,
+            bottom: bottomOffset + 0,
+            left: 16,
+            right: 16,
+            borderRadius: 20,
+
+            elevation: 12,
             shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: -2,
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 3.84,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            overflow: "hidden",
           },
-          tabBarActiveTintColor: theme === "dark" ? "#4CAF50" : "#2196F3",
-          tabBarInactiveTintColor: theme === "dark" ? "#cccccc" : "#666666",
-          headerStyle: {
-            backgroundColor: theme === "dark" ? "#2a2a2a" : "#ffffff",
+          tabBarItemStyle: {
+            borderRadius: 12,
+            marginHorizontal: 6,
+            marginVertical: 6,
           },
-          headerTintColor: theme === "dark" ? "#ffffff" : "#333333",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
+          tabBarActiveTintColor: theme === "dark" ? "#4CAF50" : "#1976D2",
+          tabBarInactiveTintColor: theme === "dark" ? "#bdbdbd" : "#9e9e9e",
           tabBarLabelStyle: {
             fontSize: 12,
-            fontWeight: "600",
-            marginTop: 5,
+            fontWeight: "700",
+            marginBottom: 0,
           },
           tabBarIconStyle: {
-            marginTop: 5,
+            marginTop: 0,
           },
         }}
       >
@@ -104,6 +108,28 @@ const AppNavigator: React.FC = () => {
                 color={color}
                 size={size || 24}
               />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Events"
+          component={EventsScreen}
+          options={{
+            title: t("events"),
+            tabBarLabel: t("events"),
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="event" color={color} size={size || 24} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{
+            title: t("settings"),
+            tabBarLabel: t("settings"),
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="settings" color={color} size={size || 24} />
             ),
           }}
         />

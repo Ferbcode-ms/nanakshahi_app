@@ -1,34 +1,1569 @@
-import { NanakshahiDate } from "../types";
+import { NanakshahiDate, Event } from "../types";
+import {
+  nanakshahiToGregorian,
+  gregorianToNanakshahi,
+} from "../utils/dateConverter";
 
-export interface Event {
-  id: string;
-  title: string;
-  titlePunjabi: string;
-  type: string; // e.g., "festival", "gurpurab", "holiday", etc.
-  date: NanakshahiDate;
-}
-
-const EVENTS: Event[] = [
+// Complete Sikh Events Database
+export const SIKH_EVENTS: Event[] = [
+  // GURPURABS (Guru Birth/Death Anniversaries)
   {
-    id: "1",
+    id: "guru-nanak-birth",
+    title: "Guru Nanak Dev Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 9, day: 7, monthName: "Maghar" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description:
+      "Birth anniversary of Guru Nanak Dev Ji, the founder of Sikhism",
+    descriptionPunjabi: "ਸਿੱਖ ਧਰਮ ਦੇ ਬਾਨੀ ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Nanak Dev Ji was born in 1469 CE and founded Sikhism. This day celebrates his divine wisdom and teachings.",
+    significancePunjabi:
+      "ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ 1469 ਈਸਵੀ ਵਿੱਚ ਪੈਦਾ ਹੋਏ ਅਤੇ ਸਿੱਖ ਧਰਮ ਦੀ ਸਥਾਪਨਾ ਕੀਤੀ। ਇਹ ਦਿਨ ਉਨ੍ਹਾਂ ਦੀ ਦੈਵੀ ਬੁੱਧੀ ਅਤੇ ਸਿੱਖਿਆਵਾਂ ਦਾ ਜਸ਼ਨ ਮਨਾਉਂਦਾ ਹੈ।",
+    color: "#FF6B35",
+    icon: "🎂",
+    isRecurring: true,
+  },
+  {
+    id: "guru-angad-birth",
+    title: "Guru Angad Dev Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਅੰਗਦ ਦੇਵ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 4, day: 5, monthName: "Harh" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Angad Dev Ji, the second Guru",
+    descriptionPunjabi: "ਦੂਜੇ ਗੁਰੂ ਗੁਰੂ ਅੰਗਦ ਦੇਵ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Angad Dev Ji standardized the Gurmukhi script and established the tradition of langar.",
+    significancePunjabi:
+      "ਗੁਰੂ ਅੰਗਦ ਦੇਵ ਜੀ ਨੇ ਗੁਰਮੁਖੀ ਲਿਪੀ ਨੂੰ ਮਾਨਕੀਕ੍ਰਿਤ ਕੀਤਾ ਅਤੇ ਲੰਗਰ ਦੀ ਪਰੰਪਰਾ ਸਥਾਪਿਤ ਕੀਤੀ।",
+    color: "#4CAF50",
+    icon: "📝",
+    isRecurring: true,
+  },
+  {
+    id: "guru-amardas-birth",
+    title: "Guru Amar Das Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਅਮਰ ਦਾਸ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 6, day: 9, monthName: "Bhadon" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Amar Das Ji, the third Guru",
+    descriptionPunjabi: "ਤੀਜੇ ਗੁਰੂ ਗੁਰੂ ਅਮਰ ਦਾਸ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Amar Das Ji abolished the caste system, established equality, and created the Manji system.",
+    significancePunjabi:
+      "ਗੁਰੂ ਅਮਰ ਦਾਸ ਜੀ ਨੇ ਜਾਤ ਪ੍ਰਥਾ ਨੂੰ ਖਤਮ ਕੀਤਾ, ਸਮਾਨਤਾ ਸਥਾਪਿਤ ਕੀਤੀ ਅਤੇ ਮੰਜੀ ਪ੍ਰਣਾਲੀ ਬਣਾਈ।",
+    color: "#2196F3",
+    icon: "⚖️",
+    isRecurring: true,
+  },
+  {
+    id: "guru-ramdas-birth",
+    title: "Guru Ram Das Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਰਾਮ ਦਾਸ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 10, day: 2, monthName: "Katik" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Ram Das Ji, the fourth Guru",
+    descriptionPunjabi: "ਚੌਥੇ ਗੁਰੂ ਗੁਰੂ ਰਾਮ ਦਾਸ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Ram Das Ji founded Amritsar and established the Golden Temple. He composed the Lavan for Anand Karaj.",
+    significancePunjabi:
+      "ਗੁਰੂ ਰਾਮ ਦਾਸ ਜੀ ਨੇ ਅੰਮ੍ਰਿਤਸਰ ਦੀ ਸਥਾਪਨਾ ਕੀਤੀ ਅਤੇ ਸੁਨਹਿਰੀ ਮੰਦਰ ਸਥਾਪਿਤ ਕੀਤਾ। ਉਨ੍ਹਾਂ ਨੇ ਅਨੰਦ ਕਾਰਜ ਲਈ ਲਾਵਾਂ ਰਚੀਆਂ।",
+    color: "#FFC107",
+    icon: "🕍",
+    isRecurring: true,
+  },
+  {
+    id: "guru-arjan-birth",
+    title: "Guru Arjan Dev Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਅਰਜਨ ਦੇਵ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 5, day: 2, monthName: "Sawan" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Arjan Dev Ji, the fifth Guru",
+    descriptionPunjabi: "ਪੰਜਵੇਂ ਗੁਰੂ ਗੁਰੂ ਅਰਜਨ ਦੇਵ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Arjan Dev Ji compiled the Adi Granth and built the Golden Temple. He was the first Sikh martyr.",
+    significancePunjabi:
+      "ਗੁਰੂ ਅਰਜਨ ਦੇਵ ਜੀ ਨੇ ਆਦਿ ਗ੍ਰੰਥ ਦਾ ਸੰਪਾਦਨ ਕੀਤਾ ਅਤੇ ਸੁਨਹਿਰੀ ਮੰਦਰ ਬਣਾਇਆ। ਉਹ ਪਹਿਲੇ ਸਿੱਖ ਸ਼ਹੀਦ ਸਨ।",
+    color: "#9C27B0",
+    icon: "📖",
+    isRecurring: true,
+  },
+  {
+    id: "guru-hargobind-birth",
+    title: "Guru Hargobind Sahib Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਹਰਗੋਬਿੰਦ ਸਾਹਿਬ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 7, day: 5, monthName: "Assu" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Hargobind Sahib Ji, the sixth Guru",
+    descriptionPunjabi: "ਛੇਵੇਂ ਗੁਰੂ ਗੁਰੂ ਹਰਗੋਬਿੰਦ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Hargobind Sahib Ji established the concept of Miri-Piri and built the Akal Takht.",
+    significancePunjabi:
+      "ਗੁਰੂ ਹਰਗੋਬਿੰਦ ਸਾਹਿਬ ਜੀ ਨੇ ਮੀਰੀ-ਪੀਰੀ ਦੀ ਧਾਰਣਾ ਸਥਾਪਿਤ ਕੀਤੀ ਅਤੇ ਅਕਾਲ ਤਖ਼ਤ ਬਣਾਇਆ।",
+    color: "#FF5722",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+  {
+    id: "guru-har-rai-birth",
+    title: "Guru Har Rai Sahib Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਹਰ ਰਾਇ ਸਾਹਿਬ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 2, day: 19, monthName: "Vaisakh" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Har Rai Sahib Ji, the seventh Guru",
+    descriptionPunjabi: "ਸੱਤਵੇਂ ਗੁਰੂ ਗੁਰੂ ਹਰ ਰਾਇ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Har Rai Sahib Ji was known for his compassion and healing abilities. He maintained peace during his Guruship.",
+    significancePunjabi:
+      "ਗੁਰੂ ਹਰ ਰਾਇ ਸਾਹਿਬ ਜੀ ਆਪਣੀ ਦਇਆ ਅਤੇ ਰੋਗ ਠੀਕ ਕਰਨ ਦੀ ਸਮਰੱਥਾ ਲਈ ਜਾਣੇ ਜਾਂਦੇ ਸਨ। ਉਨ੍ਹਾਂ ਨੇ ਆਪਣੇ ਗੁਰੂ ਕਾਲ ਦੌਰਾਨ ਸ਼ਾਂਤੀ ਬਣਾਈ ਰੱਖੀ।",
+    color: "#4CAF50",
+    icon: "🌿",
+    isRecurring: true,
+  },
+  {
+    id: "guru-har-krishan-birth",
+    title: "Guru Har Krishan Sahib Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਹਰ ਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 8, day: 8, monthName: "Katik" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description:
+      "Birth anniversary of Guru Har Krishan Sahib Ji, the eighth Guru",
+    descriptionPunjabi: "ਅੱਠਵੇਂ ਗੁਰੂ ਗੁਰੂ ਹਰ ਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Har Krishan Sahib Ji became Guru at the age of 5 and served humanity during a smallpox epidemic.",
+    significancePunjabi:
+      "ਗੁਰੂ ਹਰ ਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ 5 ਸਾਲ ਦੀ ਉਮਰ ਵਿੱਚ ਗੁਰੂ ਬਣੇ ਅਤੇ ਛੋਟੀ ਮਾਤਾ ਦੀ ਮਹਾਮਾਰੀ ਦੌਰਾਨ ਮਨੁੱਖਤਾ ਦੀ ਸੇਵਾ ਕੀਤੀ।",
+    color: "#E91E63",
+    icon: "👶",
+    isRecurring: true,
+  },
+  {
+    id: "guru-tegh-bahadur-birth",
+    title: "Guru Tegh Bahadur Sahib Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਤੇਗ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 4, day: 1, monthName: "Harh" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description:
+      "Birth anniversary of Guru Tegh Bahadur Sahib Ji, the ninth Guru",
+    descriptionPunjabi: "ਨੌਵੇਂ ਗੁਰੂ ਗੁਰੂ ਤੇਗ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Tegh Bahadur Sahib Ji sacrificed his life to protect religious freedom and became the 'Shield of India'.",
+    significancePunjabi:
+      "ਗੁਰੂ ਤੇਗ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਨੇ ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਦੀ ਰੱਖਿਆ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ ਅਤੇ 'ਹਿੰਦ ਦੀ ਢਾਲ' ਬਣੇ।",
+    color: "#795548",
+    icon: "🛡️",
+    isRecurring: true,
+  },
+  {
+    id: "guru-gobind-singh-birth",
+    title: "Guru Gobind Singh Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 1, day: 7, monthName: "Chet" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Gobind Singh Ji, the tenth Guru",
+    descriptionPunjabi: "ਦਸਵੇਂ ਗੁਰੂ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Gobind Singh Ji established the Khalsa Panth, created the Five Ks, and declared the Guru Granth Sahib as the eternal Guru.",
+    significancePunjabi:
+      "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਨੇ ਖਾਲਸਾ ਪੰਥ ਸਥਾਪਿਤ ਕੀਤਾ, ਪੰਜ ਕਕਾਰ ਬਣਾਏ ਅਤੇ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਨੂੰ ਸਦਾ ਗੁਰੂ ਘੋਸ਼ਿਤ ਕੀਤਾ।",
+    color: "#F44336",
+    icon: "🦁",
+    isRecurring: true,
+  },
+
+  // MAJOR FESTIVALS
+  {
+    id: "vaisakhi",
     title: "Vaisakhi",
     titlePunjabi: "ਵੈਸਾਖੀ",
-    type: "festival",
     date: { year: 556, month: 2, day: 1, monthName: "Vaisakh" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Sikh New Year and the founding of Khalsa Panth",
+    descriptionPunjabi: "ਸਿੱਖ ਨਵਾਂ ਸਾਲ ਅਤੇ ਖਾਲਸਾ ਪੰਥ ਦੀ ਸਥਾਪਨਾ",
+    significance:
+      "On Vaisakhi 1699, Guru Gobind Singh Ji created the Khalsa and established the Five Ks. It marks the Sikh New Year.",
+    significancePunjabi:
+      "ਵੈਸਾਖੀ 1699 ਵਿੱਚ, ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਨੇ ਖਾਲਸਾ ਬਣਾਇਆ ਅਤੇ ਪੰਜ ਕਕਾਰ ਸਥਾਪਿਤ ਕੀਤੇ। ਇਹ ਸਿੱਖ ਨਵਾਂ ਸਾਲ ਦਰਸਾਉਂਦਾ ਹੈ।",
+    color: "#FF9800",
+    icon: "🌾",
+    isRecurring: true,
   },
   {
-    id: "2",
-    title: "Guru Nanak Gurpurab",
-    titlePunjabi: "ਗੁਰੂ ਨਾਨਕ ਗੁਰਪੁਰਬ",
-    type: "gurpurab",
-    date: { year: 556, month: 9, day: 7, monthName: "Maghar" },
+    id: "bandi-chhor-divas",
+    title: "Bandi Chhor Divas",
+    titlePunjabi: "ਬੰਦੀ ਛੋੜ ਦਿਵਸ",
+    date: { year: 556, month: 8, day: 21, monthName: "Katik" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description:
+      "Day of Liberation - Guru Hargobind Sahib Ji's release from Gwalior Fort",
+    descriptionPunjabi:
+      "ਮੁਕਤੀ ਦਾ ਦਿਨ - ਗੁਰੂ ਹਰਗੋਬਿੰਦ ਸਾਹਿਬ ਜੀ ਦਾ ਗਵਾਲੀਅਰ ਕਿਲ੍ਹੇ ਤੋਂ ਰਿਹਾਈ",
+    significance:
+      "Guru Hargobind Sahib Ji was released from imprisonment along with 52 other kings, symbolizing freedom and justice.",
+    significancePunjabi:
+      "ਗੁਰੂ ਹਰਗੋਬਿੰਦ ਸਾਹਿਬ ਜੀ ਨੂੰ 52 ਹੋਰ ਰਾਜਿਆਂ ਸਮੇਤ ਕੈਦ ਤੋਂ ਰਿਹਾਈ ਮਿਲੀ, ਜੋ ਸੁਤੰਤਰਤਾ ਅਤੇ ਨਿਆਂ ਦਾ ਪ੍ਰਤੀਕ ਹੈ।",
+    color: "#9C27B0",
+    icon: "🕯️",
+    isRecurring: true,
   },
-  // Add more events as needed
+  {
+    id: "gurpurab-guru-granth-sahib",
+    title: "Guru Granth Sahib Ji Gurpurab",
+    titlePunjabi: "ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਗੁਰਪੁਰਬ",
+    date: { year: 556, month: 6, day: 1, monthName: "Bhadon" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Installation of Guru Granth Sahib Ji as the eternal Guru",
+    descriptionPunjabi: "ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਨੂੰ ਸਦਾ ਗੁਰੂ ਵਜੋਂ ਸਥਾਪਿਤ ਕਰਨਾ",
+    significance:
+      "Guru Gobind Singh Ji declared Guru Granth Sahib Ji as the eternal Guru, ending the line of human Gurus.",
+    significancePunjabi:
+      "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਨੇ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਨੂੰ ਸਦਾ ਗੁਰੂ ਘੋਸ਼ਿਤ ਕੀਤਾ, ਮਨੁੱਖੀ ਗੁਰੂਆਂ ਦੀ ਲੜੀ ਨੂੰ ਸਮਾਪਤ ਕੀਤਾ।",
+    color: "#FFD700",
+    icon: "📚",
+    isRecurring: true,
+  },
+
+  // HISTORICAL EVENTS
+  {
+    id: "martyrdom-guru-arjan",
+    title: "Martyrdom of Guru Arjan Dev Ji",
+    titlePunjabi: "ਗੁਰੂ ਅਰਜਨ ਦੇਵ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    date: { year: 556, month: 6, day: 2, monthName: "Bhadon" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "First Sikh martyrdom - Guru Arjan Dev Ji's sacrifice",
+    descriptionPunjabi: "ਪਹਿਲੀ ਸਿੱਖ ਸ਼ਹੀਦੀ - ਗੁਰੂ ਅਰਜਨ ਦੇਵ ਜੀ ਦਾ ਬਲੀਦਾਨ",
+    significance:
+      "Guru Arjan Dev Ji became the first Sikh martyr, setting an example of supreme sacrifice for religious freedom.",
+    significancePunjabi:
+      "ਗੁਰੂ ਅਰਜਨ ਦੇਵ ਜੀ ਪਹਿਲੇ ਸਿੱਖ ਸ਼ਹੀਦ ਬਣੇ, ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਲਈ ਸਰਵਉੱਚ ਬਲੀਦਾਨ ਦੀ ਮਿਸਾਲ ਕਾਇਮ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-guru-tegh-bahadur",
+    title: "Martyrdom of Guru Tegh Bahadur Sahib Ji",
+    titlePunjabi: "ਗੁਰੂ ਤੇਗ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    date: { year: 556, month: 12, day: 11, monthName: "Phagan" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Guru Tegh Bahadur Sahib Ji's martyrdom in Delhi",
+    descriptionPunjabi: "ਦਿੱਲੀ ਵਿੱਚ ਗੁਰੂ ਤੇਗ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Guru Tegh Bahadur Sahib Ji sacrificed his life to protect the religious freedom of Hindus, becoming the 'Shield of India'.",
+    significancePunjabi:
+      "ਗੁਰੂ ਤੇਗ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਨੇ ਹਿੰਦੂਆਂ ਦੀ ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਦੀ ਰੱਖਿਆ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ, 'ਹਿੰਦ ਦੀ ਢਾਲ' ਬਣੇ।",
+    color: "#8D6E63",
+    icon: "🛡️",
+    isRecurring: true,
+  },
+  {
+    id: "creation-khalsa",
+    title: "Creation of Khalsa",
+    titlePunjabi: "ਖਾਲਸਾ ਦੀ ਸਿਰਜਣਾ",
+    date: { year: 556, month: 2, day: 1, monthName: "Vaisakh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Guru Gobind Singh Ji created the Khalsa Panth",
+    descriptionPunjabi: "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਨੇ ਖਾਲਸਾ ਪੰਥ ਬਣਾਇਆ",
+    significance:
+      "Guru Gobind Singh Ji created the Khalsa, establishing the Five Ks and the code of conduct for Sikhs.",
+    significancePunjabi:
+      "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਨੇ ਖਾਲਸਾ ਬਣਾਇਆ, ਪੰਜ ਕਕਾਰ ਅਤੇ ਸਿੱਖਾਂ ਲਈ ਆਚਾਰ ਸੰਹਿਤਾ ਸਥਾਪਿਤ ਕੀਤੀ।",
+    color: "#FF5722",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+
+  // BHADON (Month 6) EVENTS
+  {
+    id: "martyrdom-sant-harbhajan-singh",
+    title: "Martyrdom Day Sant Harbhajan Singh Ji Longowal",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਸੰਤ ਹਰਭਜਨ ਸਿੰਘ ਜੀ ਲੌਂਗੋਵਾਲ",
+    date: { year: 556, month: 6, day: 1, monthName: "Bhadon" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Sant Harbhajan Singh Ji Longowal",
+    descriptionPunjabi: "ਸੰਤ ਹਰਭਜਨ ਸਿੰਘ ਜੀ ਲੌਂਗੋਵਾਲ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Sant Harbhajan Singh Ji Longowal was a prominent Sikh leader who sacrificed his life for Sikh unity.",
+    significancePunjabi:
+      "ਸੰਤ ਹਰਭਜਨ ਸਿੰਘ ਜੀ ਲੌਂਗੋਵਾਲ ਇੱਕ ਪ੍ਰਮੁੱਖ ਸਿੱਖ ਨੇਤਾ ਸਨ ਜਿਨ੍ਹਾਂ ਨੇ ਸਿੱਖ ਏਕਤਾ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "first-prakash-guru-granth-sahib",
+    title: "First Prakash Guru Granth Sahib Ji",
+    titlePunjabi: "ਪਹਿਲਾ ਪ੍ਰਕਾਸ਼ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 6, day: 2, monthName: "Bhadon" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "First installation of Guru Granth Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਦੀ ਪਹਿਲੀ ਸਥਾਪਨਾ",
+    significance:
+      "The first installation of Guru Granth Sahib Ji as the eternal Guru of Sikhs.",
+    significancePunjabi:
+      "ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਦੀ ਸਿੱਖਾਂ ਦੇ ਸਦਾ ਗੁਰੂ ਵਜੋਂ ਪਹਿਲੀ ਸਥਾਪਨਾ।",
+    color: "#FFD700",
+    icon: "📚",
+    isRecurring: true,
+  },
+  {
+    id: "gurgaddi-guru-granth-sahib",
+    title: "Gurgaddi Day Sri Guru Granth Sahib Ji",
+    titlePunjabi: "ਗੁਰਗੱਦੀ ਦਿਵਸ ਸ੍ਰੀ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 6, day: 2, monthName: "Bhadon" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Gurgaddi (enthronement) of Guru Granth Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਦੀ ਗੁਰਗੱਦੀ",
+    significance:
+      "Guru Granth Sahib Ji was enthroned as the eternal Guru, ending the line of human Gurus.",
+    significancePunjabi:
+      "ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਨੂੰ ਸਦਾ ਗੁਰੂ ਵਜੋਂ ਗੁਰਗੱਦੀ ਮਿਲੀ, ਮਨੁੱਖੀ ਗੁਰੂਆਂ ਦੀ ਲੜੀ ਨੂੰ ਸਮਾਪਤ ਕੀਤਾ।",
+    color: "#FFD700",
+    icon: "👑",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-guru-ramdas",
+    title: "Jor Mela Guru Ramdas Sahib Ji",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਗੁਰੂ ਰਾਮਦਾਸ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 6, day: 9, monthName: "Bhadon" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Annual fair commemorating Guru Ramdas Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਰਾਮਦਾਸ ਸਾਹਿਬ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair to commemorate the life and teachings of Guru Ramdas Sahib Ji.",
+    significancePunjabi:
+      "ਗੁਰੂ ਰਾਮਦਾਸ ਸਾਹਿਬ ਜੀ ਦੇ ਜੀਵਨ ਅਤੇ ਸਿੱਖਿਆਵਾਂ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#FF9800",
+    icon: "🕍",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-guru-arjan-goindwal",
+    title: "Jor Mela Guru Arjan Sahib Ji (Jor Mela Goindwal Sahib)",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਗੁਰੂ ਅਰਜਨ ਸਾਹਿਬ ਜੀ (ਜੋੜ-ਮੇਲਾ ਗੋਇੰਦਵਾਲ ਸਾਹਿਬ)",
+    date: { year: 556, month: 6, day: 9, monthName: "Bhadon" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description:
+      "Annual fair at Goindwal Sahib commemorating Guru Arjan Sahib Ji",
+    descriptionPunjabi:
+      "ਗੋਇੰਦਵਾਲ ਸਾਹਿਬ ਵਿੱਚ ਗੁਰੂ ਅਰਜਨ ਸਾਹਿਬ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair at Goindwal Sahib to commemorate Guru Arjan Sahib Ji's contributions to Sikhism.",
+    significancePunjabi:
+      "ਗੋਇੰਦਵਾਲ ਸਾਹਿਬ ਵਿੱਚ ਗੁਰੂ ਅਰਜਨ ਸਾਹਿਬ ਜੀ ਦੇ ਸਿੱਖ ਧਰਮ ਵਿੱਚ ਯੋਗਦਾਨ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#9C27B0",
+    icon: "📖",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-baba-budha",
+    title: "Jor Mela Baba Budha Ji (Ramdas)",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਬਾਬਾ ਬੁੱਢਾ ਜੀ (ਰਮਦਾਸ)",
+    date: { year: 556, month: 6, day: 22, monthName: "Bhadon" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Annual fair commemorating Baba Budha Ji",
+    descriptionPunjabi: "ਬਾਬਾ ਬੁੱਢਾ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair to commemorate Baba Budha Ji, a prominent figure in Sikh history.",
+    significancePunjabi:
+      "ਸਿੱਖ ਇਤਿਹਾਸ ਵਿੱਚ ਪ੍ਰਮੁੱਖ ਸ਼ਖਸੀਅਤ ਬਾਬਾ ਬੁੱਢਾ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#795548",
+    icon: "👴",
+    isRecurring: true,
+  },
+  {
+    id: "gurgaddi-guru-angad",
+    title: "Gurgaddi Day Guru Angad Dev Sahib Ji",
+    titlePunjabi: "ਗੁਰਗੱਦੀ ਦਿਵਸ ਗੁਰੂ ਅੰਗਦ ਦੇਵ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 6, day: 25, monthName: "Bhadon" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Gurgaddi (enthronement) of Guru Angad Dev Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਅੰਗਦ ਦੇਵ ਸਾਹਿਬ ਜੀ ਦੀ ਗੁਰਗੱਦੀ",
+    significance:
+      "Guru Angad Dev Sahib Ji was enthroned as the second Guru of Sikhs.",
+    significancePunjabi:
+      "ਗੁਰੂ ਅੰਗਦ ਦੇਵ ਸਾਹਿਬ ਜੀ ਨੂੰ ਸਿੱਖਾਂ ਦੇ ਦੂਜੇ ਗੁਰੂ ਵਜੋਂ ਗੁਰਗੱਦੀ ਮਿਲੀ।",
+    color: "#4CAF50",
+    icon: "👑",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-guru-nanak",
+    title: "Jor Mela Guru Nanak Dev Sahib Ji",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 6, day: 25, monthName: "Bhadon" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Annual fair commemorating Guru Nanak Dev Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਸਾਹਿਬ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair to commemorate the founder of Sikhism, Guru Nanak Dev Sahib Ji.",
+    significancePunjabi:
+      "ਸਿੱਖ ਧਰਮ ਦੇ ਬਾਨੀ ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਸਾਹਿਬ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#FF6B35",
+    icon: "🎂",
+    isRecurring: true,
+  },
+  {
+    id: "dussehra-khalsa",
+    title: "Dussehra Khalsa (Damdama Sahib)",
+    titlePunjabi: "ਦਸਹਿਰਾ ਖ਼ਾਲਸਾ (ਦਮਦਮਾ ਸਾਹਿਬ)",
+    date: { year: 556, month: 6, day: 29, monthName: "Bhadon" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Dussehra celebration at Damdama Sahib",
+    descriptionPunjabi: "ਦਮਦਮਾ ਸਾਹਿਬ ਵਿੱਚ ਦਸਹਿਰਾ ਦਾ ਜਸ਼ਨ",
+    significance:
+      "Dussehra celebration at Damdama Sahib, a significant historical site in Sikh history.",
+    significancePunjabi:
+      "ਸਿੱਖ ਇਤਿਹਾਸ ਵਿੱਚ ਮਹੱਤਵਪੂਰਨ ਇਤਿਹਾਸਿਕ ਸਥਾਨ ਦਮਦਮਾ ਸਾਹਿਬ ਵਿੱਚ ਦਸਹਿਰਾ ਦਾ ਜਸ਼ਨ।",
+    color: "#FF9800",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+
+  // ASSU (Month 7) EVENTS
+  {
+    id: "jor-mela-bibi-bhani",
+    title: "Jor Mela Bibi Bhani Ji (Thotha)",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਬੀਬੀ ਭਾਣੀ ਜੀ (ਠੋਠਾ)",
+    date: { year: 556, month: 7, day: 21, monthName: "Assu" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Annual fair commemorating Bibi Bhani Ji",
+    descriptionPunjabi: "ਬੀਬੀ ਭਾਣੀ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair to commemorate Bibi Bhani Ji, daughter of Guru Amar Das Ji and wife of Guru Ram Das Ji.",
+    significancePunjabi:
+      "ਗੁਰੂ ਅਮਰ ਦਾਸ ਜੀ ਦੀ ਧੀ ਅਤੇ ਗੁਰੂ ਰਾਮ ਦਾਸ ਜੀ ਦੀ ਪਤਨੀ ਬੀਬੀ ਭਾਣੀ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#E91E63",
+    icon: "👸",
+    isRecurring: true,
+  },
+  {
+    id: "gurpurab-guru-ramdas",
+    title: "Gurpurab Sri Guru Ramdas Sahib Ji",
+    titlePunjabi: "ਪ੍ਰਕਾਸ਼ ਗੁਰੂਪੁਰਬ ਸ੍ਰੀ ਗੁਰੂ ਰਾਮਦਾਸ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 7, day: 23, monthName: "Assu" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Ramdas Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਰਾਮਦਾਸ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Ramdas Sahib Ji founded Amritsar and established the Golden Temple. He composed the Lavan for Anand Karaj.",
+    significancePunjabi:
+      "ਗੁਰੂ ਰਾਮਦਾਸ ਸਾਹਿਬ ਜੀ ਨੇ ਅੰਮ੍ਰਿਤਸਰ ਦੀ ਸਥਾਪਨਾ ਕੀਤੀ ਅਤੇ ਸੁਨਹਿਰੀ ਮੰਦਰ ਸਥਾਪਿਤ ਕੀਤਾ। ਉਨ੍ਹਾਂ ਨੇ ਅਨੰਦ ਕਾਰਜ ਲਈ ਲਾਵਾਂ ਰਚੀਆਂ।",
+    color: "#FFC107",
+    icon: "🕍",
+    isRecurring: true,
+  },
+  {
+    id: "birth-bhai-taru-singh",
+    title: "Birth Day Bhai Taru Singh Ji",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਭਾਈ ਤਾਰੂ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 7, day: 24, monthName: "Assu" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Bhai Taru Singh Ji",
+    descriptionPunjabi: "ਭਾਈ ਤਾਰੂ ਸਿੰਘ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Bhai Taru Singh Ji was a prominent Sikh martyr who sacrificed his life for Sikh principles.",
+    significancePunjabi:
+      "ਭਾਈ ਤਾਰੂ ਸਿੰਘ ਜੀ ਇੱਕ ਪ੍ਰਮੁੱਖ ਸਿੱਖ ਸ਼ਹੀਦ ਸਨ ਜਿਨ੍ਹਾਂ ਨੇ ਸਿੱਖ ਸਿਧਾਂਤਾਂ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-bhai-subedar-singh",
+    title: "Martyrdom Day Bhai Subedar Singh Ji (Samp)",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਭਾਈ ਸੁਬੇਦਾਰ ਸਿੰਘ ਜੀ (ਸੰਪ)",
+    date: { year: 556, month: 7, day: 24, monthName: "Assu" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Bhai Subedar Singh Ji",
+    descriptionPunjabi: "ਭਾਈ ਸੁਬੇਦਾਰ ਸਿੰਘ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Bhai Subedar Singh Ji sacrificed his life for Sikh principles and religious freedom.",
+    significancePunjabi:
+      "ਭਾਈ ਸੁਬੇਦਾਰ ਸਿੰਘ ਜੀ ਨੇ ਸਿੱਖ ਸਿਧਾਂਤਾਂ ਅਤੇ ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "bhai-harisingh",
+    title: "Bhai Harisingh Ji (Jind)",
+    titlePunjabi: "ਭਾਈ ਹਰਿਸਿੰਘ ਜੀ (ਜਿੰਦ)",
+    date: { year: 556, month: 7, day: 24, monthName: "Assu" },
+    type: "historical",
+    category: "minor",
+    priority: "medium",
+    description: "Commemoration of Bhai Harisingh Ji",
+    descriptionPunjabi: "ਭਾਈ ਹਰਿਸਿੰਘ ਜੀ ਦੀ ਯਾਦ",
+    significance:
+      "Commemoration of Bhai Harisingh Ji, a prominent figure in Sikh history.",
+    significancePunjabi:
+      "ਸਿੱਖ ਇਤਿਹਾਸ ਵਿੱਚ ਪ੍ਰਮੁੱਖ ਸ਼ਖਸੀਅਤ ਭਾਈ ਹਰਿਸਿੰਘ ਜੀ ਦੀ ਯਾਦ।",
+    color: "#795548",
+    icon: "👨",
+    isRecurring: true,
+  },
+  {
+    id: "gurgaddi-guru-har-krishan",
+    title: "Gurgaddi Day Guru Har Krishan Sahib Ji",
+    titlePunjabi: "ਗੁਰਗੱਦੀ ਦਿਵਸ ਗੁਰੂ ਹਰਿਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 7, day: 28, monthName: "Assu" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Gurgaddi (enthronement) of Guru Har Krishan Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਹਰਿਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ ਦੀ ਗੁਰਗੱਦੀ",
+    significance:
+      "Guru Har Krishan Sahib Ji was enthroned as the eighth Guru of Sikhs at a very young age.",
+    significancePunjabi:
+      "ਗੁਰੂ ਹਰਿਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ ਨੂੰ ਬਹੁਤ ਛੋਟੀ ਉਮਰ ਵਿੱਚ ਸਿੱਖਾਂ ਦੇ ਅੱਠਵੇਂ ਗੁਰੂ ਵਜੋਂ ਗੁਰਗੱਦੀ ਮਿਲੀ।",
+    color: "#E91E63",
+    icon: "👑",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-guru-har-rai",
+    title: "Jor Mela Guru Har Rai Sahib Ji",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਗੁਰੂ ਹਰਿਰਾਇ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 7, day: 28, monthName: "Assu" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Annual fair commemorating Guru Har Rai Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਹਰਿਰਾਇ ਸਾਹਿਬ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair to commemorate Guru Har Rai Sahib Ji, the seventh Guru of Sikhs.",
+    significancePunjabi:
+      "ਸਿੱਖਾਂ ਦੇ ਸੱਤਵੇਂ ਗੁਰੂ ਗੁਰੂ ਹਰਿਰਾਇ ਸਾਹਿਬ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#4CAF50",
+    icon: "🌿",
+    isRecurring: true,
+  },
+
+  // KATTAK (Month 8) EVENTS
+  {
+    id: "birth-sant-giani-kartar-singh",
+    title: "Birth Day Sant Giani Kartar Singh Ji Bhindranwale",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਸੰਤ ਗਿਆਨੀ ਕਰਤਾਰ ਸਿੰਘ ਜੀ ਭਿੰਡਰਾਂਵਾਲੇ",
+    date: { year: 556, month: 8, day: 4, monthName: "Kattak" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Sant Giani Kartar Singh Ji Bhindranwale",
+    descriptionPunjabi: "ਸੰਤ ਗਿਆਨੀ ਕਰਤਾਰ ਸਿੰਘ ਜੀ ਭਿੰਡਰਾਂਵਾਲੇ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Sant Giani Kartar Singh Ji Bhindranwale was a prominent Sikh leader and religious scholar.",
+    significancePunjabi:
+      "ਸੰਤ ਗਿਆਨੀ ਕਰਤਾਰ ਸਿੰਘ ਜੀ ਭਿੰਡਰਾਂਵਾਲੇ ਇੱਕ ਪ੍ਰਮੁੱਖ ਸਿੱਖ ਨੇਤਾ ਅਤੇ ਧਾਰਮਿਕ ਵਿਦਵਾਨ ਸਨ।",
+    color: "#795548",
+    icon: "👨‍🦳",
+    isRecurring: true,
+  },
+  {
+    id: "gurgaddi-guru-granth-sahib-kattak",
+    title: "Gurgaddi Day Guru Granth Sahib Ji",
+    titlePunjabi: "ਗੁਰਗੱਦੀ ਦਿਵਸ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 8, day: 2, monthName: "Kattak" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Gurgaddi (enthronement) of Guru Granth Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਦੀ ਗੁਰਗੱਦੀ",
+    significance:
+      "Guru Granth Sahib Ji was enthroned as the eternal Guru, ending the line of human Gurus.",
+    significancePunjabi:
+      "ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਨੂੰ ਸਦਾ ਗੁਰੂ ਵਜੋਂ ਗੁਰਗੱਦੀ ਮਿਲੀ, ਮਨੁੱਖੀ ਗੁਰੂਆਂ ਦੀ ਲੜੀ ਨੂੰ ਸਮਾਪਤ ਕੀਤਾ।",
+    color: "#FFD700",
+    icon: "👑",
+    isRecurring: true,
+  },
+  {
+    id: "birth-baba-budha-kathunangal",
+    title: "Birth Day Baba Budha Ji (Kathunangal)",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਬਾਬਾ ਬੁੱਢਾ ਜੀ (ਕਠੂਨੰਗਲ)",
+    date: { year: 556, month: 8, day: 2, monthName: "Kattak" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Baba Budha Ji",
+    descriptionPunjabi: "ਬਾਬਾ ਬੁੱਢਾ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Baba Budha Ji was a prominent figure in Sikh history who served under six Gurus.",
+    significancePunjabi:
+      "ਬਾਬਾ ਬੁੱਢਾ ਜੀ ਸਿੱਖ ਇਤਿਹਾਸ ਵਿੱਚ ਪ੍ਰਮੁੱਖ ਸ਼ਖਸੀਅਤ ਸਨ ਜਿਨ੍ਹਾਂ ਨੇ ਛੇ ਗੁਰੂਆਂ ਦੀ ਸੇਵਾ ਕੀਤੀ।",
+    color: "#795548",
+    icon: "👴",
+    isRecurring: true,
+  },
+  {
+    id: "akal-chalana-jassa-singh",
+    title: "Akal Chalana M. Jassa Singh Ji Ahluwalia",
+    titlePunjabi: "ਅਕਾਲ ਚਲਾਨਾ ਮ. ਜੱਸਾ ਸਿੰਘ ਜੀ ਆਹਲੂਵਾਲੀਆ",
+    date: { year: 556, month: 8, day: 2, monthName: "Kattak" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Death anniversary of M. Jassa Singh Ji Ahluwalia",
+    descriptionPunjabi: "ਮ. ਜੱਸਾ ਸਿੰਘ ਜੀ ਆਹਲੂਵਾਲੀਆ ਦੀ ਮੌਤ ਦੀ ਯਾਦ",
+    significance:
+      "M. Jassa Singh Ji Ahluwalia was a prominent Sikh leader and military commander.",
+    significancePunjabi:
+      "ਮ. ਜੱਸਾ ਸਿੰਘ ਜੀ ਆਹਲੂਵਾਲੀਆ ਇੱਕ ਪ੍ਰਮੁੱਖ ਸਿੱਖ ਨੇਤਾ ਅਤੇ ਫੌਜੀ ਕਮਾਂਡਰ ਸਨ।",
+    color: "#D32F2F",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-guru-gobind-singh",
+    title: "Jor Mela Guru Gobind Singh Sahib Ji",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 8, day: 10, monthName: "Kattak" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Annual fair commemorating Guru Gobind Singh Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair to commemorate Guru Gobind Singh Sahib Ji, the tenth Guru of Sikhs.",
+    significancePunjabi:
+      "ਸਿੱਖਾਂ ਦੇ ਦਸਵੇਂ ਗੁਰੂ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#F44336",
+    icon: "🦁",
+    isRecurring: true,
+  },
+  {
+    id: "saka-panja-sahib",
+    title: "Saka Panja Sahib (Pakistan)",
+    titlePunjabi: "ਸਾਕਾ ਪੰਜਾ ਸਾਹਿਬ (ਪਾਕਿਸਤਾਨ)",
+    date: { year: 556, month: 8, day: 14, monthName: "Kattak" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Historical event at Panja Sahib",
+    descriptionPunjabi: "ਪੰਜਾ ਸਾਹਿਬ ਵਿੱਚ ਇਤਿਹਾਸਿਕ ਘਟਨਾ",
+    significance:
+      "A significant historical event at Panja Sahib in Pakistan related to Sikh history.",
+    significancePunjabi:
+      "ਪਾਕਿਸਤਾਨ ਵਿੱਚ ਪੰਜਾ ਸਾਹਿਬ ਵਿੱਚ ਸਿੱਖ ਇਤਿਹਾਸ ਨਾਲ ਸੰਬੰਧਿਤ ਮਹੱਤਵਪੂਰਨ ਇਤਿਹਾਸਿਕ ਘਟਨਾ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-bhai-besa-singh",
+    title: "Martyrdom Day Bhai Besa Singh Ji",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਭਾਈ ਬੈਸਾ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 8, day: 15, monthName: "Kattak" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Bhai Besa Singh Ji",
+    descriptionPunjabi: "ਭਾਈ ਬੈਸਾ ਸਿੰਘ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Bhai Besa Singh Ji sacrificed his life for Sikh principles and religious freedom.",
+    significancePunjabi:
+      "ਭਾਈ ਬੈਸਾ ਸਿੰਘ ਜੀ ਨੇ ਸਿੱਖ ਸਿਧਾਂਤਾਂ ਅਤੇ ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "punjab-state-day",
+    title: "Punjab State Day",
+    titlePunjabi: "ਪੰਜਾਬੀ ਸੂਬਾ ਦਿਵਸ",
+    date: { year: 556, month: 8, day: 16, monthName: "Kattak" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Punjab State Day",
+    descriptionPunjabi: "ਪੰਜਾਬੀ ਸੂਬਾ ਦਿਵਸ",
+    significance: "Celebrates the formation of the state of Punjab.",
+    significancePunjabi: "ਪੰਜਾਬ ਰਾਜ ਦੀ ਸਥਾਪਨਾ ਦਾ ਜਸ਼ਨ ਮਨਾਉਂਦਾ ਹੈ।",
+    color: "#FF5722",
+    icon: "🏛️",
+    isRecurring: true,
+  },
+  {
+    id: "birth-bhagat-namdev",
+    title: "Birth Day Bhagat Namdev Ji",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਭਗਤ ਨਾਮਦੇਵ ਜੀ",
+    date: { year: 556, month: 8, day: 18, monthName: "Kattak" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Bhagat Namdev Ji",
+    descriptionPunjabi: "ਭਗਤ ਨਾਮਦੇਵ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Bhagat Namdev Ji was a prominent saint and poet whose compositions are included in Guru Granth Sahib Ji.",
+    significancePunjabi:
+      "ਭਗਤ ਨਾਮਦੇਵ ਜੀ ਇੱਕ ਪ੍ਰਮੁੱਖ ਸੰਤ ਅਤੇ ਕਵੀ ਸਨ ਜਿਨ੍ਹਾਂ ਦੀਆਂ ਰਚਨਾਵਾਂ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਵਿੱਚ ਸ਼ਾਮਿਲ ਹਨ।",
+    color: "#9C27B0",
+    icon: "📖",
+    isRecurring: true,
+  },
+  {
+    id: "birth-mata-sahib-kaur",
+    title: "Birth Day Mata Sahib Kaur Ji",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਮਾਤਾ ਸਾਹਿਬ ਕੌਰ ਜੀ",
+    date: { year: 556, month: 8, day: 18, monthName: "Kattak" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Mata Sahib Kaur Ji",
+    descriptionPunjabi: "ਮਾਤਾ ਸਾਹਿਬ ਕੌਰ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Mata Sahib Kaur Ji was the mother of the Khalsa and played a significant role in Sikh history.",
+    significancePunjabi:
+      "ਮਾਤਾ ਸਾਹਿਬ ਕੌਰ ਜੀ ਖਾਲਸਾ ਦੀ ਮਾਤਾ ਸਨ ਅਤੇ ਸਿੱਖ ਇਤਿਹਾਸ ਵਿੱਚ ਮਹੱਤਵਪੂਰਨ ਭੂਮਿਕਾ ਨਿਭਾਈ।",
+    color: "#E91E63",
+    icon: "👸",
+    isRecurring: true,
+  },
+  {
+    id: "gurpurab-guru-nanak-kattak",
+    title: "Gurpurab Guru Nanak Dev Sahib Ji",
+    titlePunjabi: "ਪ੍ਰਕਾਸ਼ ਗੁਰੂਪੁਰਬ ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 8, day: 20, monthName: "Kattak" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Nanak Dev Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Nanak Dev Ji was born in 1469 CE and founded Sikhism. This day celebrates his divine wisdom and teachings.",
+    significancePunjabi:
+      "ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ 1469 ਈਸਵੀ ਵਿੱਚ ਪੈਦਾ ਹੋਏ ਅਤੇ ਸਿੱਖ ਧਰਮ ਦੀ ਸਥਾਪਨਾ ਕੀਤੀ। ਇਹ ਦਿਨ ਉਨ੍ਹਾਂ ਦੀ ਦੈਵੀ ਬੁੱਧੀ ਅਤੇ ਸਿੱਖਿਆਵਾਂ ਦਾ ਜਸ਼ਨ ਮਨਾਉਂਦਾ ਹੈ।",
+    color: "#FF6B35",
+    icon: "🎂",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-baba-sri-chand",
+    title: "Jor Mela Baba Sri Chand Ji",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਬਾਬਾ ਸ਼੍ਰੀ ਚੰਦ ਜੀ",
+    date: { year: 556, month: 8, day: 20, monthName: "Kattak" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Annual fair commemorating Baba Sri Chand Ji",
+    descriptionPunjabi: "ਬਾਬਾ ਸ਼੍ਰੀ ਚੰਦ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair to commemorate Baba Sri Chand Ji, the eldest son of Guru Nanak Dev Ji.",
+    significancePunjabi:
+      "ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ ਦੇ ਸਭ ਤੋਂ ਵੱਡੇ ਪੁੱਤਰ ਬਾਬਾ ਸ਼੍ਰੀ ਚੰਦ ਜੀ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#795548",
+    icon: "👴",
+    isRecurring: true,
+  },
+  {
+    id: "samapana-day-sgpc",
+    title: "Samapana Day Sromani Gurdwara Parbandhak Committee",
+    titlePunjabi: "ਸਮਾਪਨਾ ਦਿਵਸ ਸ੍ਰੋਮਣੀ ਗੁਰਦੁਆਰਾ ਪ੍ਰਬੰਧਕ ਕਮੇਟੀ",
+    date: { year: 556, month: 8, day: 30, monthName: "Kattak" },
+    type: "historical",
+    category: "minor",
+    priority: "medium",
+    description: "Foundation day of SGPC",
+    descriptionPunjabi: "ਸ੍ਰੋਮਣੀ ਗੁਰਦੁਆਰਾ ਪ੍ਰਬੰਧਕ ਕਮੇਟੀ ਦਾ ਸਥਾਪਨਾ ਦਿਨ",
+    significance:
+      "Commemorates the foundation of the Sromani Gurdwara Parbandhak Committee (SGPC).",
+    significancePunjabi:
+      "ਸ੍ਰੋਮਣੀ ਗੁਰਦੁਆਰਾ ਪ੍ਰਬੰਧਕ ਕਮੇਟੀ (SGPC) ਦੀ ਸਥਾਪਨਾ ਦੀ ਯਾਦ ਮਨਾਉਂਦਾ ਹੈ।",
+    color: "#4CAF50",
+    icon: "🏛️",
+    isRecurring: true,
+  },
+
+  // MAGHAR (Month 9) EVENTS
+  {
+    id: "gurgaddi-guru-gobind-singh-350",
+    title: "Gurgaddi Day Guru Gobind Singh Sahib Ji (350 Years)",
+    titlePunjabi: "ਗੁਰਗੱਦੀ ਦਿਵਸ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ (350 ਸਾਲਾ)",
+    date: { year: 556, month: 9, day: 8, monthName: "Maghar" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description:
+      "Gurgaddi (enthronement) of Guru Gobind Singh Sahib Ji - 350th anniversary",
+    descriptionPunjabi:
+      "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ ਦੀ ਗੁਰਗੱਦੀ - 350ਵਾਂ ਵਰ੍ਹੇਗੰਢ",
+    significance:
+      "Guru Gobind Singh Sahib Ji was enthroned as the tenth Guru of Sikhs, marking 350 years of this historic event.",
+    significancePunjabi:
+      "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ ਨੂੰ ਸਿੱਖਾਂ ਦੇ ਦਸਵੇਂ ਗੁਰੂ ਵਜੋਂ ਗੁਰਗੱਦੀ ਮਿਲੀ, ਇਸ ਇਤਿਹਾਸਿਕ ਘਟਨਾ ਦੇ 350 ਸਾਲ ਪੂਰੇ ਹੋਏ।",
+    color: "#F44336",
+    icon: "👑",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-bhai-vilayat-mati-sati-das",
+    title:
+      "Martyrdom Day Bhai Vilayat Ji, Bhai Mati Das Ji and Bhai Sati Das Ji (350 Years)",
+    titlePunjabi:
+      "ਸ਼ਹੀਦੀ ਦਿਵਸ ਭਾਈ ਵਿਲਾਇਤ ਜੀ, ਭਾਈ ਮਤੀ ਦਾਸ ਜੀ ਅਤੇ ਭਾਈ ਸਤੀ ਦਾਸ ਜੀ (350 ਸਾਲਾ)",
+    date: { year: 556, month: 9, day: 8, monthName: "Maghar" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description:
+      "Martyrdom of Bhai Vilayat Ji, Bhai Mati Das Ji and Bhai Sati Das Ji - 350th anniversary",
+    descriptionPunjabi:
+      "ਭਾਈ ਵਿਲਾਇਤ ਜੀ, ਭਾਈ ਮਤੀ ਦਾਸ ਜੀ ਅਤੇ ਭਾਈ ਸਤੀ ਦਾਸ ਜੀ ਦੀ ਸ਼ਹੀਦੀ - 350ਵਾਂ ਵਰ੍ਹੇਗੰਢ",
+    significance:
+      "These three Sikhs were martyred alongside Guru Tegh Bahadur Sahib Ji, marking 350 years of their supreme sacrifice.",
+    significancePunjabi:
+      "ਇਹ ਤਿੰਨੇ ਸਿੱਖ ਗੁਰੂ ਤੇਗ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਦੇ ਨਾਲ ਸ਼ਹੀਦ ਹੋਏ, ਉਨ੍ਹਾਂ ਦੇ ਸਰਵਉੱਚ ਬਲੀਦਾਨ ਦੇ 350 ਸਾਲ ਪੂਰੇ ਹੋਏ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-guru-tegh-bahadur-350",
+    title: "Martyrdom Day Guru Tegh Bahadur Sahib Ji (350 Years)",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਗੁਰੂ ਤੇਗ਼ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ (350 ਸਾਲਾ)",
+    date: { year: 556, month: 9, day: 11, monthName: "Maghar" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Guru Tegh Bahadur Sahib Ji - 350th anniversary",
+    descriptionPunjabi: "ਗੁਰੂ ਤੇਗ਼ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਦੀ ਸ਼ਹੀਦੀ - 350ਵਾਂ ਵਰ੍ਹੇਗੰਢ",
+    significance:
+      "Guru Tegh Bahadur Sahib Ji sacrificed his life to protect religious freedom, marking 350 years of this historic martyrdom.",
+    significancePunjabi:
+      "ਗੁਰੂ ਤੇਗ਼ ਬਹਾਦਰ ਸਾਹਿਬ ਜੀ ਨੇ ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਦੀ ਰੱਖਿਆ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ, ਇਸ ਇਤਿਹਾਸਿਕ ਸ਼ਹੀਦੀ ਦੇ 350 ਸਾਲ ਪੂਰੇ ਹੋਏ।",
+    color: "#8D6E63",
+    icon: "🛡️",
+    isRecurring: true,
+  },
+  {
+    id: "akal-chalana-bhai-mardana",
+    title: "Akal Chalana Bhai Mardana Ji",
+    titlePunjabi: "ਅਕਾਲ ਚਲਾਨਾ ਭਾਈ ਮਰਦਾਨਾ ਜੀ",
+    date: { year: 556, month: 9, day: 13, monthName: "Maghar" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Death anniversary of Bhai Mardana Ji",
+    descriptionPunjabi: "ਭਾਈ ਮਰਦਾਨਾ ਜੀ ਦੀ ਮੌਤ ਦੀ ਯਾਦ",
+    significance:
+      "Bhai Mardana Ji was the first Sikh and the constant companion of Guru Nanak Dev Ji, playing the rabab.",
+    significancePunjabi:
+      "ਭਾਈ ਮਰਦਾਨਾ ਜੀ ਪਹਿਲੇ ਸਿੱਖ ਅਤੇ ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ ਦੇ ਸਥਿਰ ਸਾਥੀ ਸਨ, ਰਬਾਬ ਵਜਾਉਂਦੇ ਸਨ।",
+    color: "#D32F2F",
+    icon: "🎵",
+    isRecurring: true,
+  },
+  {
+    id: "birth-sahibzada-baba-zorawar-singh",
+    title: "Birth Day Sahibzada Baba Zorawar Singh Ji",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਜੋਰਾਵਰ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 9, day: 14, monthName: "Maghar" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Sahibzada Baba Zorawar Singh Ji",
+    descriptionPunjabi: "ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਜੋਰਾਵਰ ਸਿੰਘ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Sahibzada Baba Zorawar Singh Ji was the eldest son of Guru Gobind Singh Ji and a great warrior.",
+    significancePunjabi:
+      "ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਜੋਰਾਵਰ ਸਿੰਘ ਜੀ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਦੇ ਸਭ ਤੋਂ ਵੱਡੇ ਪੁੱਤਰ ਅਤੇ ਮਹਾਨ ਯੋਧਾ ਸਨ।",
+    color: "#F44336",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-baba-gurbakhsh-singh",
+    title: "Martyrdom Day Baba Gurbakhsh Singh Ji",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਬਾਬਾ ਗੁਰਬਖਸ਼ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 9, day: 16, monthName: "Maghar" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Baba Gurbakhsh Singh Ji",
+    descriptionPunjabi: "ਬਾਬਾ ਗੁਰਬਖਸ਼ ਸਿੰਘ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Baba Gurbakhsh Singh Ji sacrificed his life for Sikh principles and religious freedom.",
+    significancePunjabi:
+      "ਬਾਬਾ ਗੁਰਬਖਸ਼ ਸਿੰਘ ਜੀ ਨੇ ਸਿੱਖ ਸਿਧਾਂਤਾਂ ਅਤੇ ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "birth-sahibzada-baba-fateh-singh",
+    title: "Birth Day Sahibzada Baba Fateh Singh Ji",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਫਤਿਹ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 9, day: 18, monthName: "Maghar" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Sahibzada Baba Fateh Singh Ji",
+    descriptionPunjabi: "ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਫਤਿਹ ਸਿੰਘ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Sahibzada Baba Fateh Singh Ji was the youngest son of Guru Gobind Singh Ji and a great martyr.",
+    significancePunjabi:
+      "ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਫਤਿਹ ਸਿੰਘ ਜੀ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਦੇ ਸਭ ਤੋਂ ਛੋਟੇ ਪੁੱਤਰ ਅਤੇ ਮਹਾਨ ਸ਼ਹੀਦ ਸਨ।",
+    color: "#F44336",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+  {
+    id: "samapana-day-akali-dal",
+    title: "Samapana Day Sromani Akali Dal",
+    titlePunjabi: "ਸਮਾਪਨਾ ਦਿਵਸ ਸ੍ਰੋਮਣੀ ਅਕਾਲੀ ਦਲ",
+    date: { year: 556, month: 9, day: 18, monthName: "Maghar" },
+    type: "historical",
+    category: "minor",
+    priority: "medium",
+    description: "Foundation day of Sromani Akali Dal",
+    descriptionPunjabi: "ਸ੍ਰੋਮਣੀ ਅਕਾਲੀ ਦਲ ਦਾ ਸਥਾਪਨਾ ਦਿਨ",
+    significance:
+      "Commemorates the foundation of the Sromani Akali Dal, a prominent Sikh political party.",
+    significancePunjabi:
+      "ਪ੍ਰਮੁੱਖ ਸਿੱਖ ਰਾਜਨੀਤਿਕ ਪਾਰਟੀ ਸ੍ਰੋਮਣੀ ਅਕਾਲੀ ਦਲ ਦੀ ਸਥਾਪਨਾ ਦੀ ਯਾਦ ਮਨਾਉਂਦਾ ਹੈ।",
+    color: "#4CAF50",
+    icon: "🏛️",
+    isRecurring: true,
+  },
+  {
+    id: "kirpa-sri-anandpur-sahib-ghallughara",
+    title: "Kirpa Sri Anandpur Sahib Chhota Ghallughara",
+    titlePunjabi: "ਕਿਰਪਾ ਸ੍ਰੀ ਅਨੰਦਪੁਰ ਸਾਹਿਬ ਛੋਟਾ ਘੱਲੂਘਾਰਾ",
+    date: { year: 556, month: 9, day: 26, monthName: "Maghar" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Chhota Ghallughara (Lesser Holocaust) at Anandpur Sahib",
+    descriptionPunjabi: "ਅਨੰਦਪੁਰ ਸਾਹਿਬ ਵਿੱਚ ਛੋਟਾ ਘੱਲੂਘਾਰਾ",
+    significance:
+      "The Chhota Ghallughara was a period of persecution of Sikhs by the Mughal Empire.",
+    significancePunjabi:
+      "ਛੋਟਾ ਘੱਲੂਘਾਰਾ ਮੁਗਲ ਸਾਮਰਾਜ ਦੁਆਰਾ ਸਿੱਖਾਂ ਦੇ ਸਤਾਏ ਜਾਣ ਦਾ ਦੌਰ ਸੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+
+  // POH (Month 10) EVENTS
+  {
+    id: "birth-baba-jeevan-singh",
+    title: "Birth Day Baba Jeevan Singh Ji (Bhai Jaita Ji)",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਬਾਬਾ ਜੀਵਨ ਸਿੰਘ ਜੀ (ਭਾਈ ਜੈਤਾ ਜੀ)",
+    date: { year: 556, month: 10, day: 2, monthName: "Poh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Baba Jeevan Singh Ji (Bhai Jaita Ji)",
+    descriptionPunjabi: "ਬਾਬਾ ਜੀਵਨ ਸਿੰਘ ਜੀ (ਭਾਈ ਜੈਤਾ ਜੀ) ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Baba Jeevan Singh Ji (Bhai Jaita Ji) was a prominent Sikh figure who served Guru Gobind Singh Ji.",
+    significancePunjabi:
+      "ਬਾਬਾ ਜੀਵਨ ਸਿੰਘ ਜੀ (ਭਾਈ ਜੈਤਾ ਜੀ) ਇੱਕ ਪ੍ਰਮੁੱਖ ਸਿੱਖ ਸ਼ਖਸੀਅਤ ਸਨ ਜਿਨ੍ਹਾਂ ਨੇ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਦੀ ਸੇਵਾ ਕੀਤੀ।",
+    color: "#795548",
+    icon: "👨",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-elder-sahibzade-chamkaur",
+    title: "Martyrdom Day Elder Sahibzade and Chamkaur Sahib Martyrs",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਵੱਡੇ ਸਾਹਿਬਜ਼ਾਦੇ ਅਤੇ ਚਮਕੌਰ ਸਾਹਿਬ ਦੇ ਹੋਰ ਸ਼ਹੀਦ",
+    date: { year: 556, month: 10, day: 8, monthName: "Poh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description:
+      "Martyrdom of Elder Sahibzade and other martyrs at Chamkaur Sahib",
+    descriptionPunjabi:
+      "ਵੱਡੇ ਸਾਹਿਬਜ਼ਾਦੇ ਅਤੇ ਚਮਕੌਰ ਸਾਹਿਬ ਦੇ ਹੋਰ ਸ਼ਹੀਦਾਂ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "The elder Sahibzade and other Sikhs were martyred at the Battle of Chamkaur Sahib.",
+    significancePunjabi:
+      "ਵੱਡੇ ਸਾਹਿਬਜ਼ਾਦੇ ਅਤੇ ਹੋਰ ਸਿੱਖ ਚਮਕੌਰ ਸਾਹਿਬ ਦੀ ਲੜਾਈ ਵਿੱਚ ਸ਼ਹੀਦ ਹੋਏ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-bhai-sangat-singh",
+    title: "Martyrdom Day Bhai Sangat Singh Ji",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਭਾਈ ਸੰਗਤ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 10, day: 8, monthName: "Poh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Bhai Sangat Singh Ji",
+    descriptionPunjabi: "ਭਾਈ ਸੰਗਤ ਸਿੰਘ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Bhai Sangat Singh Ji sacrificed his life for Sikh principles and religious freedom.",
+    significancePunjabi:
+      "ਭਾਈ ਸੰਗਤ ਸਿੰਘ ਜੀ ਨੇ ਸਿੱਖ ਸਿਧਾਂਤਾਂ ਅਤੇ ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-younger-sahibzade-mata-gujri",
+    title: "Martyrdom Day Younger Sahibzade and Mata Gujri Ji",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਛੋਟੇ ਸਾਹਿਬਜ਼ਾਦੇ ਅਤੇ ਮਾਤਾ ਗੁਜਰੀ ਜੀ",
+    date: { year: 556, month: 10, day: 13, monthName: "Poh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Younger Sahibzade and Mata Gujri Ji",
+    descriptionPunjabi: "ਛੋਟੇ ਸਾਹਿਬਜ਼ਾਦੇ ਅਤੇ ਮਾਤਾ ਗੁਜਰੀ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "The younger Sahibzade and Mata Gujri Ji were martyred at Sirhind.",
+    significancePunjabi:
+      "ਛੋਟੇ ਸਾਹਿਬਜ਼ਾਦੇ ਅਤੇ ਮਾਤਾ ਗੁਜਰੀ ਜੀ ਸਰਹਿੰਦ ਵਿੱਚ ਸ਼ਹੀਦ ਹੋਏ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "gurpurab-guru-gobind-singh-poh",
+    title: "Gurpurab Guru Gobind Singh Sahib Ji",
+    titlePunjabi: "ਪ੍ਰਕਾਸ਼ ਗੁਰੂਪੁਰਬ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 10, day: 13, monthName: "Poh" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Gobind Singh Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Gobind Singh Ji established the Khalsa Panth, created the Five Ks, and declared the Guru Granth Sahib as the eternal Guru.",
+    significancePunjabi:
+      "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਨੇ ਖਾਲਸਾ ਪੰਥ ਸਥਾਪਿਤ ਕੀਤਾ, ਪੰਜ ਕਕਾਰ ਬਣਾਏ ਅਤੇ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਨੂੰ ਸਦਾ ਗੁਰੂ ਘੋਸ਼ਿਤ ਕੀਤਾ।",
+    color: "#F44336",
+    icon: "🦁",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-bhai-kesar-satwant-singh",
+    title: "Martyrdom Day Bhai Kesar Singh Ji and Bhai Satwant Singh Ji",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਭਾਈ ਕੇਸਰ ਸਿੰਘ ਜੀ ਅਤੇ ਭਾਈ ਸਤਵੰਤ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 10, day: 23, monthName: "Poh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Bhai Kesar Singh Ji and Bhai Satwant Singh Ji",
+    descriptionPunjabi: "ਭਾਈ ਕੇਸਰ ਸਿੰਘ ਜੀ ਅਤੇ ਭਾਈ ਸਤਵੰਤ ਸਿੰਘ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Bhai Kesar Singh Ji and Bhai Satwant Singh Ji sacrificed their lives for Sikh principles.",
+    significancePunjabi:
+      "ਭਾਈ ਕੇਸਰ ਸਿੰਘ ਜੀ ਅਤੇ ਭਾਈ ਸਤਵੰਤ ਸਿੰਘ ਜੀ ਨੇ ਸਿੱਖ ਸਿਧਾਂਤਾਂ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+
+  // MAGH (Month 11) EVENTS
+  {
+    id: "neela-pakha-sangram-harimandir",
+    title: "Neela Pakha Sangram Sri Harimandir Sahib (Sri Amritsar)",
+    titlePunjabi: "ਨੀਲਾ ਪੱਖਾ ਸੰਗਰਾਮ ਸ੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ (ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ)",
+    date: { year: 556, month: 11, day: 1, monthName: "Magh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Historical event at Sri Harimandir Sahib",
+    descriptionPunjabi: "ਸ੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ ਵਿੱਚ ਇਤਿਹਾਸਿਕ ਘਟਨਾ",
+    significance:
+      "A significant historical event at Sri Harimandir Sahib related to Sikh history.",
+    significancePunjabi:
+      "ਸ੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ ਵਿੱਚ ਸਿੱਖ ਇਤਿਹਾਸ ਨਾਲ ਸੰਬੰਧਿਤ ਮਹੱਤਵਪੂਰਨ ਇਤਿਹਾਸਿਕ ਘਟਨਾ।",
+    color: "#FFD700",
+    icon: "🕍",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-muktsar",
+    title: "Jor Mela Muktsar Sahib (Maghi)",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਮਕਤਸਰ ਸਾਹਿਬ (ਮਾਘੀ)",
+    date: { year: 556, month: 11, day: 1, monthName: "Magh" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Annual fair at Muktsar Sahib on Maghi",
+    descriptionPunjabi: "ਮਾਘੀ ਤੇ ਮਕਤਸਰ ਸਾਹਿਬ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Annual fair at Muktsar Sahib to commemorate the martyrdom of the 40 Muktas.",
+    significancePunjabi:
+      "40 ਮੁਕਤਾਂ ਦੀ ਸ਼ਹੀਦੀ ਦੀ ਯਾਦ ਵਿੱਚ ਮਕਤਸਰ ਸਾਹਿਬ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ।",
+    color: "#607D8B",
+    icon: "❄️",
+    isRecurring: true,
+  },
+  {
+    id: "bhaiya-da-morcha",
+    title: "Bhaiya Da Morcha (Sri Amritsar)",
+    titlePunjabi: "ਭਾਈਆਂ ਦਾ ਮੋਰਚਾ (ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ)",
+    date: { year: 556, month: 11, day: 3, monthName: "Magh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Historical event at Sri Amritsar",
+    descriptionPunjabi: "ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਇਤਿਹਾਸਿਕ ਘਟਨਾ",
+    significance:
+      "A significant historical event at Sri Amritsar related to Sikh history.",
+    significancePunjabi:
+      "ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਸਿੱਖ ਇਤਿਹਾਸ ਨਾਲ ਸੰਬੰਧਿਤ ਮਹੱਤਵਪੂਰਨ ਇਤਿਹਾਸਿਕ ਘਟਨਾ।",
+    color: "#FFD700",
+    icon: "🕍",
+    isRecurring: true,
+  },
+  {
+    id: "marriage-guru-gobind-singh",
+    title: "Marriage Gurpurab Guru Gobind Singh Sahib Ji (Guru Ka Lahore)",
+    titlePunjabi: "ਵਿਆਹ ਪ੍ਰਕਾਸ਼ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ (ਗੁਰੂ ਕਾ ਲਾਹੌਰ)",
+    date: { year: 556, month: 11, day: 10, monthName: "Magh" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Marriage anniversary of Guru Gobind Singh Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ ਦਾ ਵਿਆਹ ਦਿਨ",
+    significance: "Commemorates the marriage of Guru Gobind Singh Sahib Ji.",
+    significancePunjabi: "ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਸਾਹਿਬ ਜੀ ਦੇ ਵਿਆਹ ਦੀ ਯਾਦ ਮਨਾਉਂਦਾ ਹੈ।",
+    color: "#E91E63",
+    icon: "💒",
+    isRecurring: true,
+  },
+  {
+    id: "basant-panchami",
+    title: "Basant Panchami",
+    titlePunjabi: "ਬਸੰਤ ਪੰਚਮੀ",
+    date: { year: 556, month: 11, day: 11, monthName: "Magh" },
+    type: "seasonal",
+    category: "minor",
+    priority: "medium",
+    description: "Spring festival",
+    descriptionPunjabi: "ਬਸੰਤ ਦਾ ਤਿਉਹਾਰ",
+    significance:
+      "Basant Panchami marks the arrival of spring and is celebrated with yellow colors and kite flying.",
+    significancePunjabi:
+      "ਬਸੰਤ ਪੰਚਮੀ ਬਸੰਤ ਦੇ ਆਗਮਨ ਨੂੰ ਦਰਸਾਉਂਦੀ ਹੈ ਅਤੇ ਪੀਲੇ ਰੰਗਾਂ ਅਤੇ ਪਤੰਗਬਾਜ਼ੀ ਨਾਲ ਮਨਾਈ ਜਾਂਦੀ ਹੈ।",
+    color: "#FFEB3B",
+    icon: "🪁",
+    isRecurring: true,
+  },
+  {
+    id: "birth-baba-deep-singh",
+    title: "Birth Day Baba Deep Singh Ji",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਬਾਬਾ ਦੀਪ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 11, day: 14, monthName: "Magh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Baba Deep Singh Ji",
+    descriptionPunjabi: "ਬਾਬਾ ਦੀਪ ਸਿੰਘ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Baba Deep Singh Ji was a prominent Sikh warrior and martyr who defended the Golden Temple.",
+    significancePunjabi:
+      "ਬਾਬਾ ਦੀਪ ਸਿੰਘ ਜੀ ਇੱਕ ਪ੍ਰਮੁੱਖ ਸਿੱਖ ਯੋਧਾ ਅਤੇ ਸ਼ਹੀਦ ਸਨ ਜਿਨ੍ਹਾਂ ਨੇ ਸੁਨਹਿਰੀ ਮੰਦਰ ਦੀ ਰੱਖਿਆ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+  {
+    id: "gurpurab-guru-har-rai-magh",
+    title: "Gurpurab Guru Har Rai Sahib Ji",
+    titlePunjabi: "ਪ੍ਰਕਾਸ਼ ਗੁਰੂਪੁਰਬ ਗੁਰੂ ਹਰਿਰਾਇ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 11, day: 18, monthName: "Magh" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Har Rai Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਹਰਿਰਾਇ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Har Rai Sahib Ji was known for his compassion and healing abilities. He maintained peace during his Guruship.",
+    significancePunjabi:
+      "ਗੁਰੂ ਹਰਿਰਾਇ ਸਾਹਿਬ ਜੀ ਆਪਣੀ ਦਇਆ ਅਤੇ ਰੋਗ ਠੀਕ ਕਰਨ ਦੀ ਸਮਰੱਥਾ ਲਈ ਜਾਣੇ ਜਾਂਦੇ ਸਨ। ਉਨ੍ਹਾਂ ਨੇ ਆਪਣੇ ਗੁਰੂ ਕਾਲ ਦੌਰਾਨ ਸ਼ਾਂਤੀ ਬਣਾਈ ਰੱਖੀ।",
+    color: "#4CAF50",
+    icon: "🌿",
+    isRecurring: true,
+  },
+  {
+    id: "birth-bhagat-ravidas",
+    title: "Birth Day Bhagat Ravidas Ji",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਭਗਤ ਰਵਿਦਾਸ ਜੀ",
+    date: { year: 556, month: 11, day: 18, monthName: "Magh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Bhagat Ravidas Ji",
+    descriptionPunjabi: "ਭਗਤ ਰਵਿਦਾਸ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Bhagat Ravidas Ji was a prominent saint and poet whose compositions are included in Guru Granth Sahib Ji.",
+    significancePunjabi:
+      "ਭਗਤ ਰਵਿਦਾਸ ਜੀ ਇੱਕ ਪ੍ਰਮੁੱਖ ਸੰਤ ਅਤੇ ਕਵੀ ਸਨ ਜਿਨ੍ਹਾਂ ਦੀਆਂ ਰਚਨਾਵਾਂ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ ਵਿੱਚ ਸ਼ਾਮਿਲ ਹਨ।",
+    color: "#9C27B0",
+    icon: "📖",
+    isRecurring: true,
+  },
+  {
+    id: "vadda-ghallughara-kup-chehita",
+    title: "Vadda Ghallughara Kup-Chehita (Sangrur)",
+    titlePunjabi: "ਵੱਡਾ ਘੱਲੂਘਾਰਾ ਕੂਪ-ਚੇਹੀਤਾ (ਸੰਗਰੂਰ)",
+    date: { year: 556, month: 11, day: 22, monthName: "Magh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Vadda Ghallughara (Greater Holocaust) at Kup-Chehita",
+    descriptionPunjabi: "ਕੂਪ-ਚੇਹੀਤਾ ਵਿੱਚ ਵੱਡਾ ਘੱਲੂਘਾਰਾ",
+    significance:
+      "The Vadda Ghallughara was a period of severe persecution of Sikhs by the Mughal Empire.",
+    significancePunjabi:
+      "ਵੱਡਾ ਘੱਲੂਘਾਰਾ ਮੁਗਲ ਸਾਮਰਾਜ ਦੁਆਰਾ ਸਿੱਖਾਂ ਦੇ ਭਾਰੀ ਸਤਾਏ ਜਾਣ ਦਾ ਦੌਰ ਸੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "birth-sahibzada-baba-ajit-singh",
+    title: "Birth Day Sahibzada Baba Ajit Singh Ji",
+    titlePunjabi: "ਜਨਮ ਦਿਵਸ ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਅਜੀਤ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 11, day: 25, monthName: "Magh" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Sahibzada Baba Ajit Singh Ji",
+    descriptionPunjabi: "ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਅਜੀਤ ਸਿੰਘ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Sahibzada Baba Ajit Singh Ji was the eldest son of Guru Gobind Singh Ji and a great warrior.",
+    significancePunjabi:
+      "ਸਾਹਿਬਜ਼ਾਦਾ ਬਾਬਾ ਅਜੀਤ ਸਿੰਘ ਜੀ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਦੇ ਸਭ ਤੋਂ ਵੱਡੇ ਪੁੱਤਰ ਅਤੇ ਮਹਾਨ ਯੋਧਾ ਸਨ।",
+    color: "#F44336",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+
+  // PHAGUN (Month 12) EVENTS
+  {
+    id: "saka-nankana-sahib",
+    title: "Saka Nankana Sahib",
+    titlePunjabi: "ਸਾਕਾ ਨਨਕਾਣਾ ਸਾਹਿਬ",
+    date: { year: 556, month: 12, day: 10, monthName: "Phagun" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Historical event at Nankana Sahib",
+    descriptionPunjabi: "ਨਨਕਾਣਾ ਸਾਹਿਬ ਵਿੱਚ ਇਤਿਹਾਸਿਕ ਘਟਨਾ",
+    significance:
+      "A significant historical event at Nankana Sahib related to Sikh history.",
+    significancePunjabi:
+      "ਨਨਕਾਣਾ ਸਾਹਿਬ ਵਿੱਚ ਸਿੱਖ ਇਤਿਹਾਸ ਨਾਲ ਸੰਬੰਧਿਤ ਮਹੱਤਵਪੂਰਨ ਇਤਿਹਾਸਿਕ ਘਟਨਾ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "jaito-da-morcha",
+    title: "Jaito Da Morcha (Faridkot)",
+    titlePunjabi: "ਜੈਤੇ ਦਾ ਮੋਰਚਾ (ਫਰੀਦਕੋਟ)",
+    date: { year: 556, month: 12, day: 10, monthName: "Phagun" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Historical event at Faridkot",
+    descriptionPunjabi: "ਫਰੀਦਕੋਟ ਵਿੱਚ ਇਤਿਹਾਸਿਕ ਘਟਨਾ",
+    significance:
+      "A significant historical event at Faridkot related to Sikh history.",
+    significancePunjabi:
+      "ਫਰੀਦਕੋਟ ਵਿੱਚ ਸਿੱਖ ਇਤਿਹਾਸ ਨਾਲ ਸੰਬੰਧਿਤ ਮਹੱਤਵਪੂਰਨ ਇਤਿਹਾਸਿਕ ਘਟਨਾ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "holla-mohalla-phagun",
+    title: "Holla Mohalla",
+    titlePunjabi: "ਹੋਲਾ ਮਹੱਲਾ",
+    date: { year: 556, month: 12, day: 21, monthName: "Phagun" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Martial arts festival and Khalsa gathering",
+    descriptionPunjabi: "ਯੁੱਧ ਕਲਾ ਦਾ ਤਿਉਹਾਰ ਅਤੇ ਖਾਲਸਾ ਦਾ ਮੇਲਾ",
+    significance:
+      "Holla Mohalla was started by Guru Gobind Singh Ji as a day for Sikhs to display their martial skills and spiritual strength.",
+    significancePunjabi:
+      "ਹੋਲਾ ਮਹੱਲਾ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਦੁਆਰਾ ਸਿੱਖਾਂ ਲਈ ਆਪਣੇ ਯੁੱਧ ਹੁਨਰ ਅਤੇ ਆਤਮਿਕ ਸ਼ਕਤੀ ਦਿਖਾਉਣ ਦੇ ਦਿਨ ਵਜੋਂ ਸ਼ੁਰੂ ਕੀਤਾ ਗਿਆ ਸੀ।",
+    color: "#3F51B5",
+    icon: "🏹",
+    isRecurring: true,
+  },
+
+  // SEASONAL FESTIVALS
+  {
+    id: "lohri",
+    title: "Lohri",
+    titlePunjabi: "ਲੋਹੜੀ",
+    date: { year: 556, month: 11, day: 13, monthName: "Magh" },
+    type: "seasonal",
+    category: "minor",
+    priority: "medium",
+    description: "Winter harvest festival",
+    descriptionPunjabi: "ਸਰਦੀ ਦੀ ਫਸਲ ਦਾ ਤਿਉਹਾਰ",
+    significance:
+      "Lohri marks the end of winter and the beginning of longer days. It's celebrated with bonfires and traditional songs.",
+    significancePunjabi:
+      "ਲੋਹੜੀ ਸਰਦੀ ਦੇ ਅੰਤ ਅਤੇ ਲੰਬੇ ਦਿਨਾਂ ਦੀ ਸ਼ੁਰੂਆਤ ਦਰਸਾਉਂਦੀ ਹੈ। ਇਹ ਅੱਗ ਅਤੇ ਰਵਾਇਤੀ ਗੀਤਾਂ ਨਾਲ ਮਨਾਈ ਜਾਂਦੀ ਹੈ।",
+    color: "#FF9800",
+    icon: "🔥",
+    isRecurring: true,
+  },
+
+  // SAWAN (Month 5) EVENTS
+  {
+    id: "martyrdom-bhai-taru-singh",
+    title: "Martyrdom Day Bhai Taru Singh Ji",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਭਾਈ ਤਾਰੂ ਸਿੰਘ ਜੀ",
+    date: { year: 556, month: 5, day: 1, monthName: "Sawan" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Bhai Taru Singh Ji",
+    descriptionPunjabi: "ਭਾਈ ਤਾਰੂ ਸਿੰਘ ਜੀ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Bhai Taru Singh Ji sacrificed his life for Sikh principles and religious freedom.",
+    significancePunjabi:
+      "ਭਾਈ ਤਾਰੂ ਸਿੰਘ ਜੀ ਨੇ ਸਿੱਖ ਸਿਧਾਂਤਾਂ ਅਤੇ ਧਾਰਮਿਕ ਸੁਤੰਤਰਤਾ ਲਈ ਆਪਣੀ ਜਾਨ ਕੁਰਬਾਨ ਕੀਤੀ।",
+    color: "#D32F2F",
+    icon: "💎",
+    isRecurring: true,
+  },
+  {
+    id: "gurpurab-guru-har-krishan",
+    title: "Gurpurab Sri Guru Har Krishan Sahib Ji",
+    titlePunjabi: "ਪ੍ਰਕਾਸ਼ ਗੁਰੂਪੁਰਬ ਸ੍ਰੀ ਗੁਰੂ ਹਰਿਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ",
+    date: { year: 556, month: 5, day: 4, monthName: "Sawan" },
+    type: "gurpurab",
+    category: "major",
+    priority: "high",
+    description: "Birth anniversary of Guru Har Krishan Sahib Ji",
+    descriptionPunjabi: "ਗੁਰੂ ਹਰਿਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ ਦਾ ਜਨਮ ਦਿਨ",
+    significance:
+      "Guru Har Krishan Sahib Ji became Guru at the age of 5 and served humanity during a smallpox epidemic.",
+    significancePunjabi:
+      "ਗੁਰੂ ਹਰਿਕ੍ਰਿਸ਼ਨ ਸਾਹਿਬ ਜੀ 5 ਸਾਲ ਦੀ ਉਮਰ ਵਿੱਚ ਗੁਰੂ ਬਣੇ ਅਤੇ ਛੋਟੀ ਮਾਤਾ ਦੀ ਮਹਾਮਾਰੀ ਦੌਰਾਨ ਮਨੁੱਖਤਾ ਦੀ ਸੇਵਾ ਕੀਤੀ।",
+    color: "#E91E63",
+    icon: "👶",
+    isRecurring: true,
+  },
+  {
+    id: "martyrdom-s-udham-singh",
+    title: "Martyrdom Day S. Udham Singh",
+    titlePunjabi: "ਸ਼ਹੀਦੀ ਦਿਵਸ ਸ. ਉਦੇਂ ਸਿੰਘ",
+    date: { year: 556, month: 5, day: 16, monthName: "Sawan" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "Martyrdom of Sardar Udham Singh",
+    descriptionPunjabi: "ਸਰਦਾਰ ਉਦੇਂ ਸਿੰਘ ਦੀ ਸ਼ਹੀਦੀ",
+    significance:
+      "Sardar Udham Singh avenged the Jallianwala Bagh massacre by assassinating Michael O'Dwyer.",
+    significancePunjabi:
+      "ਸਰਦਾਰ ਉਦੇਂ ਸਿੰਘ ਨੇ ਜਲਿਆਂਵਾਲਾ ਬਾਗ ਦੇ ਨਰਸੰਹਾਰ ਦਾ ਬਦਲਾ ਲੈਣ ਲਈ ਮਾਈਕਲ ਓ'ਡਵਾਇਰ ਨੂੰ ਮਾਰਿਆ।",
+    color: "#D32F2F",
+    icon: "⚔️",
+    isRecurring: true,
+  },
+  {
+    id: "mora-guru-da-bag",
+    title: "Mora Guru Da Bag (Sri Amritsar)",
+    titlePunjabi: "ਮੋਰਾ ਗੁਰੂ ਦਾ ਬਾਗ (ਸ੍ਰੀ ਅੰਮ੍ਰਿਤਸਰ)",
+    date: { year: 556, month: 5, day: 24, monthName: "Sawan" },
+    type: "historical",
+    category: "minor",
+    priority: "medium",
+    description: "Historical event at Mora Guru Da Bag",
+    descriptionPunjabi: "ਮੋਰਾ ਗੁਰੂ ਦਾ ਬਾਗ ਵਿੱਚ ਇਤਿਹਾਸਿਕ ਘਟਨਾ",
+    significance:
+      "A significant historical event related to Sikh history at Mora Guru Da Bag in Amritsar.",
+    significancePunjabi:
+      "ਅੰਮ੍ਰਿਤਸਰ ਵਿੱਚ ਮੋਰਾ ਗੁਰੂ ਦਾ ਬਾਗ ਵਿੱਚ ਸਿੱਖ ਇਤਿਹਾਸ ਨਾਲ ਸੰਬੰਧਿਤ ਮਹੱਤਵਪੂਰਨ ਇਤਿਹਾਸਿਕ ਘਟਨਾ।",
+    color: "#4CAF50",
+    icon: "🌳",
+    isRecurring: true,
+  },
+  {
+    id: "jor-mela-baba-bakala",
+    title: "Jor Mela Baba Bakala (Guru Labh Reh Day)",
+    titlePunjabi: "ਜੋੜ-ਮੇਲਾ ਬਾਬਾ ਬਕਾਲਾ (ਗੁਰੂ ਲੱਭ ਰਹੇ ਦਿਵਸ)",
+    date: { year: 556, month: 5, day: 25, monthName: "Sawan" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description:
+      "Annual fair at Baba Bakala commemorating the search for the true Guru",
+    descriptionPunjabi:
+      "ਬਾਬਾ ਬਕਾਲਾ ਵਿੱਚ ਸੱਚੇ ਗੁਰੂ ਦੀ ਭਾਲ ਦੀ ਯਾਦ ਵਿੱਚ ਸਾਲਾਨਾ ਮੇਲਾ",
+    significance:
+      "Commemorates the historical event when Sikhs searched for the true Guru after Guru Har Krishan Ji.",
+    significancePunjabi:
+      "ਗੁਰੂ ਹਰਿਕ੍ਰਿਸ਼ਨ ਜੀ ਦੇ ਬਾਅਦ ਸਿੱਖਾਂ ਦੁਆਰਾ ਸੱਚੇ ਗੁਰੂ ਦੀ ਭਾਲ ਦੀ ਇਤਿਹਾਸਿਕ ਘਟਨਾ ਦੀ ਯਾਦ ਮਨਾਉਂਦਾ ਹੈ।",
+    color: "#FF9800",
+    icon: "🔍",
+    isRecurring: true,
+  },
+  {
+    id: "independence-day",
+    title: "India's Independence Day",
+    titlePunjabi: "ਭਾਰਤ ਦਾ ਆਜ਼ਾਦੀ ਦਿਵਸ",
+    date: { year: 556, month: 5, day: 31, monthName: "Sawan" },
+    type: "historical",
+    category: "major",
+    priority: "high",
+    description: "India's Independence Day",
+    descriptionPunjabi: "ਭਾਰਤ ਦਾ ਆਜ਼ਾਦੀ ਦਿਵਸ",
+    significance:
+      "Celebrates India's independence from British rule on August 15, 1947.",
+    significancePunjabi:
+      "15 ਅਗਸਤ 1947 ਨੂੰ ਬ੍ਰਿਟਿਸ਼ ਰਾਜ ਤੋਂ ਭਾਰਤ ਦੀ ਆਜ਼ਾਦੀ ਦਾ ਜਸ਼ਨ ਮਨਾਉਂਦਾ ਹੈ।",
+    color: "#FF5722",
+    icon: "🇮🇳",
+    isRecurring: true,
+  },
+  {
+    id: "maghi",
+    title: "Maghi",
+    titlePunjabi: "ਮਾਘੀ",
+    date: { year: 556, month: 11, day: 14, monthName: "Magh" },
+    type: "seasonal",
+    category: "minor",
+    priority: "medium",
+    description: "Winter solstice festival",
+    descriptionPunjabi: "ਸਰਦੀ ਦਾ ਸੂਰਜ ਦਾ ਤਿਉਹਾਰ",
+    significance:
+      "Maghi commemorates the martyrdom of the 40 Muktas (liberated ones) who fought alongside Guru Gobind Singh Ji.",
+    significancePunjabi:
+      "ਮਾਘੀ 40 ਮੁਕਤਾਂ (ਮੁਕਤ ਹੋਏ ਲੋਕਾਂ) ਦੀ ਸ਼ਹੀਦੀ ਦੀ ਯਾਦ ਮਨਾਉਂਦੀ ਹੈ ਜੋ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਦੇ ਨਾਲ ਲੜੇ।",
+    color: "#607D8B",
+    icon: "❄️",
+    isRecurring: true,
+  },
+  {
+    id: "holla-mohalla",
+    title: "Hola Mohalla",
+    titlePunjabi: "ਹੋਲਾ ਮਹੱਲਾ",
+    date: { year: 556, month: 1, day: 1, monthName: "Chet" },
+    type: "festival",
+    category: "major",
+    priority: "high",
+    description: "Martial arts festival and Khalsa gathering",
+    descriptionPunjabi: "ਯੁੱਧ ਕਲਾ ਦਾ ਤਿਉਹਾਰ ਅਤੇ ਖਾਲਸਾ ਦਾ ਮੇਲਾ",
+    significance:
+      "Hola Mohalla was started by Guru Gobind Singh Ji as a day for Sikhs to display their martial skills and spiritual strength.",
+    significancePunjabi:
+      "ਹੋਲਾ ਮਹੱਲਾ ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ ਦੁਆਰਾ ਸਿੱਖਾਂ ਲਈ ਆਪਣੇ ਯੁੱਧ ਹੁਨਰ ਅਤੇ ਆਤਮਿਕ ਸ਼ਕਤੀ ਦਿਖਾਉਣ ਦੇ ਦਿਨ ਵਜੋਂ ਸ਼ੁਰੂ ਕੀਤਾ ਗਿਆ ਸੀ।",
+    color: "#3F51B5",
+    icon: "🏹",
+    isRecurring: true,
+  },
 ];
 
-export function getEventsForDate(date: NanakshahiDate) {
-  return EVENTS.filter(
+// Helper function to get events for a specific date
+export function getEventsForDate(date: NanakshahiDate): Event[] {
+  return SIKH_EVENTS.filter(
     (event) => event.date.day === date.day && event.date.month === date.month
-    // Optionally, match year if your events are year-specific
   );
+}
+
+// Helper function to get events by type
+export function getEventsByType(type: Event["type"]): Event[] {
+  return SIKH_EVENTS.filter((event) => event.type === type);
+}
+
+// Helper function to get events by category
+export function getEventsByCategory(category: Event["category"]): Event[] {
+  return SIKH_EVENTS.filter((event) => event.category === category);
+}
+
+// Helper function to get upcoming events (next 30 days)
+export function getUpcomingEvents(days: number = 30): Event[] {
+  const currentDate = new Date();
+  const upcomingEvents: Event[] = [];
+
+  for (let i = 0; i < days; i++) {
+    const futureDate = new Date(currentDate);
+    futureDate.setDate(currentDate.getDate() + i);
+
+    // Convert Gregorian date to Nanakshahi date using the proper conversion function
+    const nanakshahiDate = gregorianToNanakshahi(futureDate);
+
+    const events = getEventsForDate(nanakshahiDate);
+    upcomingEvents.push(...events);
+  }
+
+  return upcomingEvents;
+}
+
+// Helper function to get events for current month
+export function getEventsForCurrentMonth(): Event[] {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+
+  return SIKH_EVENTS.filter((event) => {
+    // Convert Nanakshahi date to Gregorian to check month
+    const gregDate = nanakshahiToGregorian(event.date);
+    return gregDate.month === currentMonth;
+  });
 }

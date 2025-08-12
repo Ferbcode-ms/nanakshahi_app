@@ -20,25 +20,23 @@ const SettingsButton: React.FC = () => {
 
   const styles = StyleSheet.create({
     container: {
-      position: "absolute",
-      top: Platform.OS === "ios" ? insets.top + 10 : 50,
-      right: 20,
-      zIndex: 1000,
+      flexDirection: "row",
+      alignItems: "center",
     },
     button: {
       backgroundColor: theme === "dark" ? "#2a2a2a" : "#ffffff",
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderRadius: 25,
-      marginBottom: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 20,
+      marginLeft: 8,
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 1,
       },
-      shadowOpacity: 0.15,
-      shadowRadius: 4,
-      elevation: 3,
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
       flexDirection: "row",
       alignItems: "center",
       borderWidth: 1,
@@ -46,9 +44,9 @@ const SettingsButton: React.FC = () => {
     },
     buttonText: {
       color: theme === "dark" ? "#ffffff" : "#333333",
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: "600",
-      marginLeft: 8,
+      marginLeft: 6,
     },
     icon: {
       marginRight: 4,
@@ -60,7 +58,7 @@ const SettingsButton: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={toggleTheme}>
         <MaterialIcons
           name={theme === "dark" ? "light-mode" : "dark-mode"}
-          size={20}
+          size={18}
           color={theme === "dark" ? "#FFD600" : "#333"}
           style={styles.icon}
         />
@@ -71,7 +69,7 @@ const SettingsButton: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={toggleLanguage}>
         <MaterialIcons
           name="language"
-          size={20}
+          size={18}
           color={theme === "dark" ? "#4CAF50" : "#2196F3"}
           style={styles.icon}
         />

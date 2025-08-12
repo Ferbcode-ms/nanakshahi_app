@@ -14,6 +14,24 @@ export interface GregorianDate {
   dayName?: string;
 }
 
+export interface Event {
+  id: string;
+  title: string;
+  titlePunjabi: string;
+  date: NanakshahiDate;
+  type: "gurpurab" | "festival" | "historical" | "seasonal" | "personal";
+  category: "major" | "minor" | "personal";
+  priority: "high" | "medium" | "low";
+  description: string;
+  descriptionPunjabi: string;
+  significance: string;
+  significancePunjabi: string;
+  color: string;
+  icon: string;
+  isRecurring: boolean;
+  gregorianDate?: GregorianDate;
+}
+
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -43,4 +61,5 @@ export type RootStackParamList = {
   Calendar: undefined;
   Converter: undefined;
   Events: undefined;
+  Settings: undefined;
 };

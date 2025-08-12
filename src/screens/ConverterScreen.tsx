@@ -8,11 +8,15 @@ import {
   Alert,
   ScrollView,
   Platform,
+  StatusBar,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  useSafeAreaInsets,
+  SafeAreaView,
+} from "react-native-safe-area-context";
 import {
   gregorianToNanakshahi,
   nanakshahiToGregorian,
@@ -116,105 +120,134 @@ const ConverterScreen: React.FC = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
+      backgroundColor: theme === "dark" ? "#0a0a0a" : "#f8f9fa",
     },
     scrollView: {},
     header: {
       alignItems: "center",
-      marginBottom: 30,
+      marginBottom: 35,
+      paddingTop: 10,
     },
     title: {
-      fontSize: 28,
-      fontWeight: "bold",
-      color: theme === "dark" ? "#ffffff" : "#333333",
-      marginBottom: 10,
+      fontSize: 26,
+      fontWeight: "700",
+      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
+      marginBottom: 8,
+      textAlign: "center",
     },
     subtitle: {
       fontSize: 16,
-      color: theme === "dark" ? "#cccccc" : "#666666",
+      color: theme === "dark" ? "#a0a0a0" : "#666666",
+      textAlign: "center",
+      fontWeight: "500",
     },
     card: {
-      backgroundColor: theme === "dark" ? "#2a2a2a" : "#ffffff",
-      borderRadius: 15,
-      padding: 20,
-      marginBottom: 20,
+      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
+      borderRadius: 18,
+      padding: 24,
+      marginBottom: 25,
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 3,
       },
-      shadowOpacity: 0.1,
-      shadowRadius: 3.84,
-      elevation: 5,
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      elevation: 6,
+      borderWidth: 1,
+      borderColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
     },
     cardTitle: {
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: "600",
-      color: theme === "dark" ? "#ffffff" : "#333333",
-      marginBottom: 15,
+      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
+      marginBottom: 18,
+      textAlign: "center",
     },
     typeSelector: {
       flexDirection: "row",
-      marginBottom: 20,
+      marginBottom: 25,
+      backgroundColor: theme === "dark" ? "#2a2a2a" : "#f8f9fa",
+      borderRadius: 12,
+      padding: 4,
     },
     typeButton: {
       flex: 1,
-      padding: 15,
+      padding: 12,
       alignItems: "center",
-      borderRadius: 10,
-      marginHorizontal: 5,
+      borderRadius: 8,
+      marginHorizontal: 2,
     },
     typeButtonActive: {
       backgroundColor: theme === "dark" ? "#4CAF50" : "#2196F3",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 2,
     },
     typeButtonInactive: {
-      backgroundColor: theme === "dark" ? "#3a3a3a" : "#e0e0e0",
+      backgroundColor: "transparent",
     },
     typeButtonText: {
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: "600",
     },
     typeButtonTextActive: {
       color: "#ffffff",
     },
     typeButtonTextInactive: {
-      color: theme === "dark" ? "#ffffff" : "#333333",
+      color: theme === "dark" ? "#a0a0a0" : "#666666",
     },
     inputContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginBottom: 20,
+      marginBottom: 25,
     },
     inputGroup: {
       flex: 1,
-      marginHorizontal: 5,
+      marginHorizontal: 6,
     },
     inputLabel: {
       fontSize: 14,
-      fontWeight: "500",
-      color: theme === "dark" ? "#cccccc" : "#666666",
-      marginBottom: 5,
+      fontWeight: "600",
+      color: theme === "dark" ? "#cccccc" : "#555555",
+      marginBottom: 8,
+      textAlign: "center",
     },
     input: {
-      borderWidth: 1,
+      borderWidth: 2,
       borderColor: theme === "dark" ? "#3a3a3a" : "#e0e0e0",
-      borderRadius: 8,
-      padding: 12,
+      borderRadius: 12,
+      padding: 14,
       fontSize: 16,
       color: theme === "dark" ? "#ffffff" : "#333333",
-      backgroundColor: theme === "dark" ? "#3a3a3a" : "#ffffff",
+      backgroundColor: theme === "dark" ? "#2a2a2a" : "#ffffff",
+      textAlign: "center",
+      fontWeight: "600",
     },
     buttonContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginTop: 20,
+      marginTop: 25,
     },
     button: {
       flex: 1,
-      padding: 15,
-      borderRadius: 10,
+      padding: 16,
+      borderRadius: 12,
       alignItems: "center",
-      marginHorizontal: 5,
+      marginHorizontal: 6,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
     },
     convertButton: {
       backgroundColor: theme === "dark" ? "#4CAF50" : "#2196F3",
@@ -224,7 +257,7 @@ const ConverterScreen: React.FC = () => {
     },
     buttonText: {
       fontSize: 16,
-      fontWeight: "600",
+      fontWeight: "700",
       color: "#ffffff",
     },
     resultCard: {
@@ -260,48 +293,60 @@ const ConverterScreen: React.FC = () => {
       marginTop: 5,
     },
     resultCardBetter: {
-      backgroundColor: theme === "dark" ? "#23272f" : "#f8f9fa",
-      borderRadius: 16,
-      padding: 24,
-      marginTop: 20,
-      marginBottom: 20,
+      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
+      borderRadius: 18,
+      padding: 28,
+      marginTop: 15,
+      marginBottom: 15,
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
-      elevation: 3,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 6,
       alignItems: "center",
+      borderWidth: 1,
+      borderColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
     },
     resultTitleBetter: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: theme === "dark" ? "#fff" : "#222",
-      marginBottom: 10,
+      fontSize: 22,
+      fontWeight: "700",
+      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
+      marginBottom: 12,
+      textAlign: "center",
     },
     resultTextBetter: {
-      fontSize: 28,
-      fontWeight: "bold",
+      fontSize: 30,
+      fontWeight: "800",
       color: theme === "dark" ? "#4CAF50" : "#2196F3",
       textAlign: "center",
-      marginBottom: 4,
+      marginBottom: 6,
     },
     resultSubtextBetter: {
-      fontSize: 15,
-      color: theme === "dark" ? "#cccccc" : "#666666",
+      fontSize: 16,
+      color: theme === "dark" ? "#a0a0a0" : "#666666",
       textAlign: "center",
-      marginBottom: 8,
+      marginBottom: 12,
+      fontWeight: "500",
     },
     resultDualText: {
-      fontSize: 16,
+      fontSize: 18,
       color: theme === "dark" ? "#FFB300" : "#1976D2",
       fontWeight: "600",
-      marginTop: 8,
+      marginTop: 12,
       textAlign: "center",
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
     },
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
+      <StatusBar
+        barStyle={theme === "dark" ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent
+      />
       <ScrollView
         style={{}}
         contentContainerStyle={{
@@ -311,14 +356,24 @@ const ConverterScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>{t("dateConverter")}</Text>
+          <Text style={styles.title}>
+            {language === "pa" ? "ਤਾਰੀਖ ਪਰਿਵਰਤਕ" : "Date Converter"}
+          </Text>
           <Text style={styles.subtitle}>
-            {t("convertFrom")} {t(fromType)} {t("convertTo")} {t(toType)}
+            {language === "pa"
+              ? `${fromType === "gregorian" ? "ਗ੍ਰੇਗੋਰੀਅਨ" : "ਨਾਨਕਸ਼ਾਹੀ"} ਤੋਂ ${
+                  toType === "nanakshahi" ? "ਨਾਨਕਸ਼ਾਹੀ" : "ਗ੍ਰੇਗੋਰੀਅਨ"
+                } ਵਿੱਚ ਬਦਲੋ`
+              : `Convert from ${
+                  fromType === "gregorian" ? "Gregorian" : "Nanakshahi"
+                } to ${toType === "nanakshahi" ? "Nanakshahi" : "Gregorian"}`}
           </Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>{t("convertFrom")}</Text>
+          <Text style={styles.cardTitle}>
+            {language === "pa" ? "ਇਸ ਤੋਂ ਬਦਲੋ" : "Convert From"}
+          </Text>
           <View style={styles.typeSelector}>
             <TouchableOpacity
               style={[
@@ -340,7 +395,7 @@ const ConverterScreen: React.FC = () => {
                     : styles.typeButtonTextInactive,
                 ]}
               >
-                {t("gregorian")}
+                {language === "pa" ? "ਗ੍ਰੇਗੋਰੀਅਨ" : "Gregorian"}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -363,14 +418,16 @@ const ConverterScreen: React.FC = () => {
                     : styles.typeButtonTextInactive,
                 ]}
               >
-                {t("nanakshahi")}
+                {language === "pa" ? "ਨਾਨਕਸ਼ਾਹੀ" : "Nanakshahi"}
               </Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.inputContainer}>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Day</Text>
+              <Text style={styles.inputLabel}>
+                {language === "pa" ? "ਦਿਨ" : "Day"}
+              </Text>
               <TextInput
                 style={styles.input}
                 value={day}
@@ -381,7 +438,9 @@ const ConverterScreen: React.FC = () => {
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Month</Text>
+              <Text style={styles.inputLabel}>
+                {language === "pa" ? "ਮਹੀਨਾ" : "Month"}
+              </Text>
               <TextInput
                 style={styles.input}
                 value={month}
@@ -392,7 +451,9 @@ const ConverterScreen: React.FC = () => {
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Year</Text>
+              <Text style={styles.inputLabel}>
+                {language === "pa" ? "ਸਾਲ" : "Year"}
+              </Text>
               <TextInput
                 style={styles.input}
                 value={year}
@@ -409,13 +470,17 @@ const ConverterScreen: React.FC = () => {
               style={[styles.button, styles.convertButton]}
               onPress={convertDate}
             >
-              <Text style={styles.buttonText}>{t("convert")}</Text>
+              <Text style={styles.buttonText}>
+                {language === "pa" ? "ਬਦਲੋ" : "Convert"}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.clearButton]}
               onPress={clearFields}
             >
-              <Text style={styles.buttonText}>{t("cancel")}</Text>
+              <Text style={styles.buttonText}>
+                {language === "pa" ? "ਮਿਟਾਓ" : "Clear"}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -423,7 +488,13 @@ const ConverterScreen: React.FC = () => {
         {result && (
           <View style={styles.resultCardBetter}>
             <Text style={styles.resultTitleBetter}>
-              {t("convertTo")} {t(toType)}
+              {language === "pa"
+                ? `${
+                    toType === "nanakshahi" ? "ਨਾਨਕਸ਼ਾਹੀ" : "ਗ੍ਰੇਗੋਰੀਅਨ"
+                  } ਵਿੱਚ ਨਤੀਜਾ`
+                : `Result in ${
+                    toType === "nanakshahi" ? "Nanakshahi" : "Gregorian"
+                  }`}
             </Text>
             <Text style={styles.resultTextBetter}>
               {result.day}{" "}
@@ -461,7 +532,7 @@ const ConverterScreen: React.FC = () => {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
