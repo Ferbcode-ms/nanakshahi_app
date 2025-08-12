@@ -3,12 +3,11 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
+  ScrollView,
+  Linking,
   Platform,
   StatusBar,
-  Linking,
-  Alert,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../contexts/ThemeContext";
@@ -17,6 +16,7 @@ import {
   useSafeAreaInsets,
   SafeAreaView,
 } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const SettingsScreen: React.FC = () => {
@@ -25,37 +25,50 @@ const SettingsScreen: React.FC = () => {
   const { language, toggleLanguage } = useLanguage();
   const insets = useSafeAreaInsets();
 
-  const handleLinkPress = (url: string) => {
-    Linking.openURL(url).catch(() => {
-      Alert.alert(
-        language === "pa" ? "ਗਲਤੀ" : "Error",
-        language === "pa" ? "ਲਿੰਕ ਖੋਲ੍ਹਣ ਵਿੱਚ ਗਲਤੀ" : "Error opening link"
-      );
-    });
-  };
-
-  const handleDonationPress = () => {
+  const handleDonation = () => {
     const gumroadUrl = "https://gumroad.com/l/nanakshahi-calendar";
-    handleLinkPress(gumroadUrl);
+    Linking.openURL(gumroadUrl);
   };
 
-  const handleFiverrPress = () => {
-    const fiverrUrl = "https://www.fiverr.com/ferbcode";
-    handleLinkPress(fiverrUrl);
+  const handleFerbcode = () => {
+    const ferbcodeUrl = "https://ferbcode.com";
+    Linking.openURL(ferbcodeUrl);
   };
 
-  const handleGitHubPress = () => {
-    const githubUrl = "https://github.com/ferbcode/nanakshahi-calendar";
-    handleLinkPress(githubUrl);
+  const handleEmail = () => {
+    const email = "support@nanakshahi-calendar.com";
+    const subject = "Nanakshahi Calendar Support";
+    const body = "Hello, I need help with the Nanakshahi Calendar app.";
+
+    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+    Linking.openURL(mailtoUrl);
+  };
+
+  const handleWebsite = () => {
+    const websiteUrl = "https://nanakshahi-calendar.com";
+    Linking.openURL(websiteUrl);
+  };
+
+  const handlePrivacyPolicy = () => {
+    const privacyUrl = "https://nanakshahi-calendar.com/privacy";
+    Linking.openURL(privacyUrl);
+  };
+
+  const handleTermsOfService = () => {
+    const termsUrl = "https://nanakshahi-calendar.com/terms";
+    Linking.openURL(termsUrl);
   };
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme === "dark" ? "#0a0a0a" : "#f8f9fa",
     },
     scrollView: {
       flex: 1,
+    },
+    scrollContent: {
       padding: 20,
       paddingBottom: Platform.OS === "ios" ? 120 + insets.bottom : 120,
     },
@@ -64,24 +77,29 @@ const SettingsScreen: React.FC = () => {
       marginBottom: 40,
       paddingTop: 10,
     },
-    title: {
+    headerTitle: {
       fontSize: 32,
       fontWeight: "800",
-      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
       marginBottom: 8,
       textAlign: "center",
     },
-    subtitle: {
+    headerSubtitle: {
       fontSize: 18,
-      color: theme === "dark" ? "#a0a0a0" : "#666666",
       fontWeight: "500",
       textAlign: "center",
     },
-    settingsCard: {
-      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
+    section: {
+      marginBottom: 30,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: "700",
+      marginBottom: 15,
+      marginLeft: 5,
+    },
+    card: {
       borderRadius: 20,
-      padding: 25,
-      marginBottom: 25,
+      padding: 20,
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
@@ -101,437 +119,616 @@ const SettingsScreen: React.FC = () => {
       borderBottomWidth: 1,
       borderBottomColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
     },
-    settingItemLast: {
-      borderBottomWidth: 0,
-    },
     settingLeft: {
       flexDirection: "row",
       alignItems: "center",
       flex: 1,
     },
-    settingIcon: {
-      marginRight: 15,
-      width: 24,
-      alignItems: "center",
-    },
-    settingInfo: {
+    settingText: {
+      marginLeft: 15,
       flex: 1,
     },
     settingTitle: {
       fontSize: 18,
       fontWeight: "600",
-      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
       marginBottom: 4,
     },
-    settingDescription: {
+    settingSubtitle: {
       fontSize: 14,
-      color: theme === "dark" ? "#a0a0a0" : "#666666",
+      fontWeight: "400",
     },
-    settingValue: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: theme === "dark" ? "#4CAF50" : "#1976D2",
-    },
-    toggleButton: {
-      backgroundColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
-      paddingHorizontal: 16,
+    toggle: {
+      paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 20,
-      borderWidth: 1,
-      borderColor: theme === "dark" ? "#3a3a3a" : "#e0e0e0",
+      minWidth: 40,
+      alignItems: "center",
     },
-    toggleButtonText: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: theme === "dark" ? "#ffffff" : "#333333",
-    },
-    appInfoCard: {
-      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
-      borderRadius: 20,
-      padding: 25,
-      marginBottom: 25,
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 4,
-      },
-      shadowOpacity: 0.15,
-      shadowRadius: 8,
-      elevation: 8,
-      borderWidth: 1,
-      borderColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
-    },
-    appTitle: {
-      fontSize: 24,
-      fontWeight: "800",
-      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
-      marginBottom: 8,
-      textAlign: "center",
-    },
-    appVersion: {
+    toggleText: {
       fontSize: 16,
-      color: theme === "dark" ? "#4CAF50" : "#1976D2",
       fontWeight: "600",
-      textAlign: "center",
-      marginBottom: 20,
+      color: "#ffffff",
     },
-    appDescription: {
-      fontSize: 16,
-      color: theme === "dark" ? "#cccccc" : "#666666",
-      lineHeight: 24,
-      textAlign: "center",
-      marginBottom: 20,
-    },
-    featureList: {
-      marginBottom: 20,
-    },
-    featureItem: {
+    infoItem: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 12,
+      paddingVertical: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
     },
-    featureIcon: {
-      marginRight: 12,
-      width: 20,
-      alignItems: "center",
-    },
-    featureText: {
-      fontSize: 14,
-      color: theme === "dark" ? "#cccccc" : "#666666",
+    infoText: {
+      marginLeft: 15,
       flex: 1,
     },
-    developerCard: {
-      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
-      borderRadius: 20,
-      padding: 25,
-      marginBottom: 25,
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 4,
-      },
-      shadowOpacity: 0.15,
-      shadowRadius: 8,
-      elevation: 8,
-      borderWidth: 1,
-      borderColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
-    },
-    developerTitle: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
-      marginBottom: 15,
-      textAlign: "center",
-    },
-    developerInfo: {
-      alignItems: "center",
-      marginBottom: 20,
-    },
-    developerName: {
-      fontSize: 18,
+    infoTitle: {
+      fontSize: 16,
       fontWeight: "600",
-      color: theme === "dark" ? "#4CAF50" : "#1976D2",
-      marginBottom: 8,
+      marginBottom: 4,
     },
-    developerDescription: {
+    infoSubtitle: {
       fontSize: 14,
-      color: theme === "dark" ? "#cccccc" : "#666666",
-      textAlign: "center",
-      lineHeight: 20,
+      fontWeight: "400",
     },
-    linkButton: {
-      backgroundColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
-      paddingHorizontal: 20,
-      paddingVertical: 12,
-      borderRadius: 12,
-      marginBottom: 10,
-      flexDirection: "row",
+    footer: {
       alignItems: "center",
-      justifyContent: "center",
+      marginTop: 20,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderTopColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
     },
-    linkButtonText: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: theme === "dark" ? "#ffffff" : "#333333",
-      marginLeft: 8,
-    },
-    donationCard: {
-      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
-      borderRadius: 20,
-      padding: 25,
-      marginBottom: 100,
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 4,
-      },
-      shadowOpacity: 0.15,
-      shadowRadius: 8,
-      elevation: 8,
-      borderWidth: 1,
-      borderColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
-    },
-    donationTitle: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
-      marginBottom: 15,
+    footerText: {
+      fontSize: 14,
       textAlign: "center",
-    },
-    donationDescription: {
-      fontSize: 16,
-      color: theme === "dark" ? "#cccccc" : "#666666",
-      textAlign: "center",
-      lineHeight: 24,
-      marginBottom: 20,
-    },
-    donationButton: {
-      backgroundColor: theme === "dark" ? "#4CAF50" : "#1976D2",
-      paddingHorizontal: 30,
-      paddingVertical: 15,
-      borderRadius: 15,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 4,
-      },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 6,
-    },
-    donationButtonText: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: "#ffffff",
-      marginLeft: 8,
+      marginBottom: 8,
     },
   });
 
   return (
-    <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: theme === "dark" ? "#000000" : "#f5f5f5" },
+      ]}
+      edges={["top"]}
+    >
       <StatusBar
         barStyle={theme === "dark" ? "light-content" : "dark-content"}
-        backgroundColor="transparent"
-        translucent
+        backgroundColor={theme === "dark" ? "#000000" : "#f5f5f5"}
       />
+
       <ScrollView
         style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>
+          <Text
+            style={[
+              styles.headerTitle,
+              { color: theme === "dark" ? "#ffffff" : "#333333" },
+            ]}
+          >
             {language === "pa" ? "ਸੈਟਿੰਗਾਂ" : "Settings"}
           </Text>
-          <Text style={styles.subtitle}>
-            {language === "pa" ? "ਐਪ ਦੀਆਂ ਸੈਟਿੰਗਾਂ" : "App Settings"}
+          <Text
+            style={[
+              styles.headerSubtitle,
+              { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+            ]}
+          >
+            {language === "pa"
+              ? "ਆਪਣੀ ਐਪ ਨੂੰ ਕਸਟਮਾਈਜ਼ ਕਰੋ"
+              : "Customize your app experience"}
           </Text>
         </View>
 
-        <View style={styles.settingsCard}>
-          <View style={styles.settingItem}>
-            <View style={styles.settingLeft}>
-              <View style={styles.settingIcon}>
+        {/* App Preferences Section */}
+        <View style={styles.section}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme === "dark" ? "#ffffff" : "#333333" },
+            ]}
+          >
+            {language === "pa" ? "ਐਪ ਪਸੰਦਾਂ" : "App Preferences"}
+          </Text>
+
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: theme === "dark" ? "#1f1f1f" : "#ffffff" },
+            ]}
+          >
+            <TouchableOpacity style={styles.settingItem} onPress={toggleTheme}>
+              <View style={styles.settingLeft}>
                 <MaterialIcons
                   name={theme === "dark" ? "light-mode" : "dark-mode"}
                   size={24}
-                  color={theme === "dark" ? "#FFD600" : "#333"}
+                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
                 />
+                <View style={styles.settingText}>
+                  <Text
+                    style={[
+                      styles.settingTitle,
+                      { color: theme === "dark" ? "#ffffff" : "#333333" },
+                    ]}
+                  >
+                    {language === "pa" ? "ਥੀਮ" : "Theme"}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingSubtitle,
+                      { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                    ]}
+                  >
+                    {language === "pa"
+                      ? "ਡਾਰਕ ਜਾਂ ਲਾਈਟ ਮੋਡ ਚੁਣੋ"
+                      : "Choose dark or light mode"}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>
-                  {language === "pa" ? "ਥੀਮ" : "Theme"}
-                </Text>
-                <Text style={styles.settingDescription}>
-                  {language === "pa"
-                    ? "ਐਪ ਦਾ ਰੰਗ ਸਕੀਮ ਬਦਲੋ"
-                    : "Change app color scheme"}
+              <View
+                style={[
+                  styles.toggle,
+                  { backgroundColor: theme === "dark" ? "#4CAF50" : "#1976D2" },
+                ]}
+              >
+                <Text style={styles.toggleText}>
+                  {theme === "dark" ? "🌙" : "☀️"}
                 </Text>
               </View>
-            </View>
-            <TouchableOpacity style={styles.toggleButton} onPress={toggleTheme}>
-              <Text style={styles.toggleButtonText}>
-                {theme === "dark"
-                  ? language === "pa"
-                    ? "ਲਾਈਟ"
-                    : "Light"
-                  : language === "pa"
-                  ? "ਡਾਰਕ"
-                  : "Dark"}
-              </Text>
             </TouchableOpacity>
-          </View>
 
-          <View style={[styles.settingItem, styles.settingItemLast]}>
-            <View style={styles.settingLeft}>
-              <View style={styles.settingIcon}>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={toggleLanguage}
+            >
+              <View style={styles.settingLeft}>
                 <MaterialIcons
                   name="language"
                   size={24}
-                  color={theme === "dark" ? "#4CAF50" : "#2196F3"}
+                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
                 />
+                <View style={styles.settingText}>
+                  <Text
+                    style={[
+                      styles.settingTitle,
+                      { color: theme === "dark" ? "#ffffff" : "#333333" },
+                    ]}
+                  >
+                    {language === "pa" ? "ਭਾਸ਼ਾ" : "Language"}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingSubtitle,
+                      { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                    ]}
+                  >
+                    {language === "pa"
+                      ? "ਪੰਜਾਬੀ ਜਾਂ ਅੰਗਰੇਜ਼ੀ ਚੁਣੋ"
+                      : "Choose Punjabi or English"}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>
-                  {language === "pa" ? "ਭਾਸ਼ਾ" : "Language"}
-                </Text>
-                <Text style={styles.settingDescription}>
-                  {language === "pa"
-                    ? "ਐਪ ਦੀ ਭਾਸ਼ਾ ਬਦਲੋ"
-                    : "Change app language"}
+              <View
+                style={[
+                  styles.toggle,
+                  { backgroundColor: theme === "dark" ? "#4CAF50" : "#1976D2" },
+                ]}
+              >
+                <Text style={styles.toggleText}>
+                  {language === "pa" ? "ਪਾ" : "EN"}
                 </Text>
               </View>
-            </View>
-            <TouchableOpacity
-              style={styles.toggleButton}
-              onPress={toggleLanguage}
-            >
-              <Text style={styles.toggleButtonText}>
-                {language === "en" ? "Punjabi" : "English"}
-              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* App Information Card */}
-        <View style={styles.appInfoCard}>
-          <Text style={styles.appTitle}>
-            📅 {language === "pa" ? "ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ" : "Nanakshahi Calendar"}
-          </Text>
-          <Text style={styles.appVersion}>
-            {language === "pa" ? "ਵਰਜਨ" : "Version"} 1.0.0
-          </Text>
-          <Text style={styles.appDescription}>
-            {language === "pa"
-              ? "ਇਹ ਐਪ ਸਿੱਖ ਧਰਮ ਦੇ ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ ਨੂੰ ਦਰਸਾਉਂਦੀ ਹੈ। ਇਸ ਵਿੱਚ ਗੁਰਪੁਰਬ, ਇਤਿਹਾਸਿਕ ਘਟਨਾਵਾਂ ਅਤੇ ਮਹੱਤਵਪੂਰਨ ਤਾਰੀਖਾਂ ਸ਼ਾਮਲ ਹਨ।"
-              : "This app displays the Sikh Nanakshahi calendar with Gurpurabs, historical events, and important dates. Features include date conversion, event listings, and bilingual support."}
+        {/* App Information Section */}
+        <View style={styles.section}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme === "dark" ? "#ffffff" : "#333333" },
+            ]}
+          >
+            {language === "pa" ? "ਐਪ ਬਾਰੇ ਜਾਣਕਾਰੀ" : "App Information"}
           </Text>
 
-          <View style={styles.featureList}>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <MaterialIcons
-                  name="calendar-today"
-                  size={16}
-                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
-                />
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: theme === "dark" ? "#1f1f1f" : "#ffffff" },
+            ]}
+          >
+            <View style={styles.infoItem}>
+              <MaterialIcons
+                name="info"
+                size={24}
+                color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+              />
+              <View style={styles.infoText}>
+                <Text
+                  style={[
+                    styles.infoTitle,
+                    { color: theme === "dark" ? "#ffffff" : "#333333" },
+                  ]}
+                >
+                  {language === "pa" ? "ਐਪ ਦਾ ਨਾਮ" : "App Name"}
+                </Text>
+                <Text
+                  style={[
+                    styles.infoSubtitle,
+                    { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                  ]}
+                >
+                  Nanakshahi Calendar
+                </Text>
               </View>
-              <Text style={styles.featureText}>
-                {language === "pa"
-                  ? "ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ ਦੇਖੋ"
-                  : "View Nanakshahi Calendar"}
-              </Text>
             </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <MaterialIcons
-                  name="swap-horiz"
-                  size={16}
-                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
-                />
+
+            <View style={styles.infoItem}>
+              <MaterialIcons
+                name="code"
+                size={24}
+                color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+              />
+              <View style={styles.infoText}>
+                <Text
+                  style={[
+                    styles.infoTitle,
+                    { color: theme === "dark" ? "#ffffff" : "#333333" },
+                  ]}
+                >
+                  {language === "pa" ? "ਵਰਜਨ" : "Version"}
+                </Text>
+                <Text
+                  style={[
+                    styles.infoSubtitle,
+                    { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                  ]}
+                >
+                  1.0.0
+                </Text>
               </View>
-              <Text style={styles.featureText}>
-                {language === "pa" ? "ਤਾਰੀਖ ਬਦਲੋ" : "Date Conversion"}
-              </Text>
             </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <MaterialIcons
-                  name="event"
-                  size={16}
-                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
-                />
+
+            <View style={styles.infoItem}>
+              <MaterialIcons
+                name="developer-mode"
+                size={24}
+                color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+              />
+              <View style={styles.infoText}>
+                <Text
+                  style={[
+                    styles.infoTitle,
+                    { color: theme === "dark" ? "#ffffff" : "#333333" },
+                  ]}
+                >
+                  {language === "pa" ? "ਡਿਵੈਲਪਰ" : "Developer"}
+                </Text>
+                <Text
+                  style={[
+                    styles.infoSubtitle,
+                    { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                  ]}
+                >
+                  Ferbcode
+                </Text>
               </View>
-              <Text style={styles.featureText}>
-                {language === "pa"
-                  ? "ਗੁਰਪੁਰਬ ਅਤੇ ਘਟਨਾਵਾਂ"
-                  : "Gurpurabs & Events"}
-              </Text>
             </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <MaterialIcons
-                  name="translate"
-                  size={16}
-                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
-                />
+
+            <View style={styles.infoItem}>
+              <MaterialIcons
+                name="description"
+                size={24}
+                color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+              />
+              <View style={styles.infoText}>
+                <Text
+                  style={[
+                    styles.infoTitle,
+                    { color: theme === "dark" ? "#ffffff" : "#333333" },
+                  ]}
+                >
+                  {language === "pa" ? "ਵੇਰਵਾ" : "Description"}
+                </Text>
+                <Text
+                  style={[
+                    styles.infoSubtitle,
+                    { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                  ]}
+                >
+                  {language === "pa"
+                    ? "ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ ਐਪ - ਸਿੱਖ ਧਰਮ ਅਤੇ ਸੱਭਿਆਚਾਰ ਲਈ ਇੱਕ ਸੰਪੂਰਨ ਡਿਜੀਟਲ ਕੈਲੰਡਰ"
+                    : "Nanakshahi Calendar App - A comprehensive digital calendar for Sikh religion and culture"}
+                </Text>
               </View>
-              <Text style={styles.featureText}>
-                {language === "pa" ? "ਦੋਭਾਸ਼ੀ ਸਹਾਇਤਾ" : "Bilingual Support"}
-              </Text>
             </View>
           </View>
         </View>
 
-        {/* Developer Information Card */}
-        <View style={styles.developerCard}>
-          <Text style={styles.developerTitle}>
-            👨‍💻 {language === "pa" ? "ਡਿਵੈਲਪਰ" : "Developer"}
+        {/* Ferbcode Section */}
+        <View style={styles.section}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme === "dark" ? "#ffffff" : "#333333" },
+            ]}
+          >
+            {language === "pa" ? "ਡਿਵੈਲਪਰ" : "Developer"}
           </Text>
-          <View style={styles.developerInfo}>
-            <Text style={styles.developerName}>FerbCode</Text>
-            <Text style={styles.developerDescription}>
-              {language === "pa"
-                ? "ਮੈਂ ਇੱਕ ਫ੍ਰੀਲਾਂਸ ਡਿਵੈਲਪਰ ਹਾਂ ਜੋ ਮੋਬਾਈਲ ਐਪਸ ਅਤੇ ਵੈਬਸਾਈਟਾਂ ਬਣਾਉਂਦਾ ਹਾਂ। ਇਹ ਐਪ ਸਿੱਖ ਭਾਈਚਾਰੇ ਦੀ ਸੇਵਾ ਲਈ ਬਣਾਈ ਗਈ ਹੈ।"
-                : "I'm a freelance developer specializing in mobile apps and websites. This app was created to serve the Sikh community with accurate Nanakshahi calendar information."}
-            </Text>
+
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: theme === "dark" ? "#1f1f1f" : "#ffffff" },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleFerbcode}
+            >
+              <View style={styles.settingLeft}>
+                <MaterialIcons
+                  name="business"
+                  size={24}
+                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+                />
+                <View style={styles.settingText}>
+                  <Text
+                    style={[
+                      styles.settingTitle,
+                      { color: theme === "dark" ? "#ffffff" : "#333333" },
+                    ]}
+                  >
+                    Ferbcode
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingSubtitle,
+                      { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                    ]}
+                  >
+                    {language === "pa"
+                      ? "ਡਿਵੈਲਪਰ ਦੀ ਵੈਬਸਾਈਟ ਵੇਖੋ"
+                      : "Visit developer website"}
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons
+                name="open-in-new"
+                size={20}
+                color={theme === "dark" ? "#bdbdbd" : "#666666"}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.settingItem} onPress={handleEmail}>
+              <View style={styles.settingLeft}>
+                <MaterialIcons
+                  name="email"
+                  size={24}
+                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+                />
+                <View style={styles.settingText}>
+                  <Text
+                    style={[
+                      styles.settingTitle,
+                      { color: theme === "dark" ? "#ffffff" : "#333333" },
+                    ]}
+                  >
+                    {language === "pa" ? "ਸਹਾਇਤਾ ਈਮੇਲ" : "Support Email"}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingSubtitle,
+                      { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                    ]}
+                  >
+                    support@nanakshahi-calendar.com
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons
+                name="email"
+                size={20}
+                color={theme === "dark" ? "#bdbdbd" : "#666666"}
+              />
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            style={styles.linkButton}
-            onPress={handleFiverrPress}
-          >
-            <MaterialIcons
-              name="work"
-              size={20}
-              color={theme === "dark" ? "#4CAF50" : "#1976D2"}
-            />
-            <Text style={styles.linkButtonText}>
-              {language === "pa"
-                ? "Fiverr 'ਤੇ ਮੈਨੂੰ ਹਾਇਰ ਕਰੋ"
-                : "Hire me on Fiverr"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.linkButton}
-            onPress={handleGitHubPress}
-          >
-            <MaterialIcons
-              name="code"
-              size={20}
-              color={theme === "dark" ? "#4CAF50" : "#1976D2"}
-            />
-            <Text style={styles.linkButtonText}>
-              {language === "pa"
-                ? "GitHub 'ਤੇ ਕੋਡ ਦੇਖੋ"
-                : "View Code on GitHub"}
-            </Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Donation Card */}
-        <View style={styles.donationCard}>
-          <Text style={styles.donationTitle}>
-            ❤️ {language === "pa" ? "ਦਾਨ ਕਰੋ" : "Support the App"}
-          </Text>
-          <Text style={styles.donationDescription}>
-            {language === "pa"
-              ? "ਇਹ ਐਪ ਮੁਫ਼ਤ ਹੈ ਅਤੇ ਰਹੇਗੀ। ਜੇਕਰ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਪਸੰਦ ਕਰਦੇ ਹੋ, ਤਾਂ ਕਿਰਪਾ ਕਰਕੇ ਇਸ ਦੇ ਵਿਕਾਸ ਨੂੰ ਸਮਰਥਨ ਦਿਓ।"
-              : "This app is and will remain free. If you find it useful, please consider supporting its development to help maintain and improve the app."}
+        {/* Support & Donation Section */}
+        <View style={styles.section}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme === "dark" ? "#ffffff" : "#333333" },
+            ]}
+          >
+            {language === "pa" ? "ਸਹਾਇਤਾ ਅਤੇ ਦਾਨ" : "Support & Donation"}
           </Text>
 
-          <TouchableOpacity
-            style={styles.donationButton}
-            onPress={handleDonationPress}
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: theme === "dark" ? "#1f1f1f" : "#ffffff" },
+            ]}
           >
-            <MaterialIcons name="favorite" size={24} color="#ffffff" />
-            <Text style={styles.donationButtonText}>
-              {language === "pa" ? "Gumroad 'ਤੇ ਦਾਨ ਕਰੋ" : "Donate on Gumroad"}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleDonation}
+            >
+              <View style={styles.settingLeft}>
+                <MaterialIcons name="favorite" size={24} color="#E91E63" />
+                <View style={styles.settingText}>
+                  <Text
+                    style={[
+                      styles.settingTitle,
+                      { color: theme === "dark" ? "#ffffff" : "#333333" },
+                    ]}
+                  >
+                    {language === "pa" ? "ਦਾਨ ਕਰੋ" : "Make a Donation"}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingSubtitle,
+                      { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                    ]}
+                  >
+                    {language === "pa"
+                      ? "ਐਪ ਦੇ ਵਿਕਾਸ ਨੂੰ ਸਹਾਇਤਾ ਕਰੋ"
+                      : "Support app development"}
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons
+                name="open-in-new"
+                size={20}
+                color={theme === "dark" ? "#bdbdbd" : "#666666"}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleWebsite}
+            >
+              <View style={styles.settingLeft}>
+                <MaterialIcons
+                  name="language"
+                  size={24}
+                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+                />
+                <View style={styles.settingText}>
+                  <Text
+                    style={[
+                      styles.settingTitle,
+                      { color: theme === "dark" ? "#ffffff" : "#333333" },
+                    ]}
+                  >
+                    {language === "pa" ? "ਵੈਬਸਾਈਟ" : "Website"}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingSubtitle,
+                      { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+                    ]}
+                  >
+                    nanakshahi-calendar.com
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons
+                name="open-in-new"
+                size={20}
+                color={theme === "dark" ? "#bdbdbd" : "#666666"}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Legal Section */}
+        <View style={styles.section}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme === "dark" ? "#ffffff" : "#333333" },
+            ]}
+          >
+            {language === "pa" ? "ਕਾਨੂੰਨੀ" : "Legal"}
+          </Text>
+
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: theme === "dark" ? "#1f1f1f" : "#ffffff" },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handlePrivacyPolicy}
+            >
+              <View style={styles.settingLeft}>
+                <MaterialIcons
+                  name="privacy-tip"
+                  size={24}
+                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+                />
+                <View style={styles.settingText}>
+                  <Text
+                    style={[
+                      styles.settingTitle,
+                      { color: theme === "dark" ? "#ffffff" : "#333333" },
+                    ]}
+                  >
+                    {language === "pa" ? "ਗੋਪਨੀਯਤਾ ਨੀਤੀ" : "Privacy Policy"}
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons
+                name="open-in-new"
+                size={20}
+                color={theme === "dark" ? "#bdbdbd" : "#666666"}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleTermsOfService}
+            >
+              <View style={styles.settingLeft}>
+                <MaterialIcons
+                  name="description"
+                  size={24}
+                  color={theme === "dark" ? "#4CAF50" : "#1976D2"}
+                />
+                <View style={styles.settingText}>
+                  <Text
+                    style={[
+                      styles.settingTitle,
+                      { color: theme === "dark" ? "#ffffff" : "#333333" },
+                    ]}
+                  >
+                    {language === "pa"
+                      ? "ਸੇਵਾ ਦੀਆਂ ਸ਼ਰਤਾਂ"
+                      : "Terms of Service"}
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons
+                name="open-in-new"
+                size={20}
+                color={theme === "dark" ? "#bdbdbd" : "#666666"}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text
+            style={[
+              styles.footerText,
+              { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+            ]}
+          >
+            © 2024 Ferbcode.{" "}
+            {language === "pa"
+              ? "ਸਾਰੇ ਅਧਿਕਾਰ ਸੁਰੱਖਿਅਤ ਹਨ।"
+              : "All rights reserved."}
+          </Text>
+          <Text
+            style={[
+              styles.footerText,
+              { color: theme === "dark" ? "#bdbdbd" : "#666666" },
+            ]}
+          >
+            {language === "pa"
+              ? "ਸਿੱਖ ਧਰਮ ਅਤੇ ਸੱਭਿਆਚਾਰ ਲਈ ਬਣਾਇਆ ਗਿਆ"
+              : "Made with ❤️ for Sikh religion and culture"}
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
