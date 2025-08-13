@@ -23,7 +23,7 @@ import {
 } from "../utils/dateConverter";
 import { NanakshahiDate, GregorianDate, Event } from "../types";
 
-import { getEventsForDate } from "../data/events";
+import { getEventsForDate } from "../utils/database";
 
 const HomeScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -36,6 +36,8 @@ const HomeScreen: React.FC = () => {
   const [gregorianDate, setGregorianDate] = useState<GregorianDate | null>(
     null
   );
+  const [todayEvents, setTodayEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     updateDates();
@@ -43,12 +45,22 @@ const HomeScreen: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const updateDates = () => {
-    const currentNanakshahi = getCurrentNanakshahiDate();
-    const currentGregorian = getCurrentGregorianDate();
+  const updateDates = async () => {
+    try {
+      const currentNanakshahi = getCurrentNanakshahiDate();
+      const currentGregorian = getCurrentGregorianDate();
 
-    setNanakshahiDate(currentNanakshahi);
-    setGregorianDate(currentGregorian);
+      setNanakshahiDate(currentNanakshahi);
+      setGregorianDate(currentGregorian);
+
+      // Load events for today from database
+      const events = await getEventsForDate(currentNanakshahi);
+      setTodayEvents(events);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Failed to update dates and load events:", error);
+      setIsLoading(false);
+    }
   };
 
   const getMonthName = (monthNumber: number) => {
@@ -280,7 +292,7 @@ const HomeScreen: React.FC = () => {
     },
   });
 
-  if (!nanakshahiDate || !gregorianDate) {
+  if (isLoading) {
     return (
       <SafeAreaView edges={["top"]} style={styles.container}>
         <StatusBar
@@ -320,8 +332,9 @@ const HomeScreen: React.FC = () => {
             📅 {language === "pa" ? "ਨਾਨਕਸ਼ਾਹੀ ਤਾਰੀਖ" : "Nanakshahi Date"}
           </Text>
           <Text style={styles.dateText}>
-            {nanakshahiDate.day} {getMonthName(nanakshahiDate.month)}{" "}
-            {nanakshahiDate.year}
+            {nanakshahiDate?.day}{" "}
+            {nanakshahiDate ? getMonthName(nanakshahiDate.month) : ""}{" "}
+            {nanakshahiDate?.year}
           </Text>
           <Text style={styles.dateSubtext}>
             {language === "pa" ? "ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ" : "Nanakshahi Calendar"}
@@ -333,7 +346,8 @@ const HomeScreen: React.FC = () => {
             🌍 {language === "pa" ? "ਗ੍ਰੇਗੋਰੀਅਨ ਤਾਰੀਖ" : "Gregorian Date"}
           </Text>
           <Text style={styles.dateText}>
-            {gregorianDate.day} {gregorianDate.monthName} {gregorianDate.year}
+            {gregorianDate?.day} {gregorianDate?.monthName}{" "}
+            {gregorianDate?.year}
           </Text>
           <Text style={styles.dateSubtext}>
             {language === "pa"
@@ -344,7 +358,6 @@ const HomeScreen: React.FC = () => {
 
         {/* Today's Events */}
         {(() => {
-          const todayEvents = getEventsForDate(nanakshahiDate);
           if (todayEvents.length > 0) {
             return (
               <View style={styles.dateCard}>

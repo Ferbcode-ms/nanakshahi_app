@@ -42,13 +42,15 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
   const loadLanguage = async () => {
     try {
       const savedLanguage = await AsyncStorage.getItem("language");
-      if (savedLanguage) {
+      if (savedLanguage && (savedLanguage === "en" || savedLanguage === "pa")) {
         const lang = savedLanguage as "en" | "pa";
         setLanguageState(lang);
-        i18n.changeLanguage(lang);
+        await i18n.changeLanguage(lang);
       }
     } catch (error) {
       console.error("Error loading language:", error);
+      // Fallback to default language
+      setLanguageState("en");
     }
   };
 
@@ -56,9 +58,11 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
     try {
       await AsyncStorage.setItem("language", newLanguage);
       setLanguageState(newLanguage);
-      i18n.changeLanguage(newLanguage);
+      await i18n.changeLanguage(newLanguage);
     } catch (error) {
       console.error("Error saving language:", error);
+      // Still update the state even if saving fails
+      setLanguageState(newLanguage);
     }
   };
 

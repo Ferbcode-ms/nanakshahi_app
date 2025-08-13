@@ -25,23 +25,57 @@ import {
   nanakshahiToGregorian,
 } from "../utils/dateConverter";
 import { NanakshahiDate, Event } from "../types";
-import { getEventsForDate } from "../data/events";
+import { getAllEvents } from "../utils/database";
 
 const CalendarScreen: React.FC = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { language } = useLanguage();
   const insets = useSafeAreaInsets();
-  const [currentMonth, setCurrentMonth] = useState(1);
-  const [currentYear, setCurrentYear] = useState(556);
+  const [currentMonth, setCurrentMonth] = useState<number>(() => {
+    const currentDate = getCurrentNanakshahiDate();
+    return currentDate.month;
+  });
+  const [currentYear, setCurrentYear] = useState<number>(() => {
+    const currentDate = getCurrentNanakshahiDate();
+    return currentDate.year;
+  });
   const [selectedDate, setSelectedDate] = useState<NanakshahiDate | null>(null);
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Use the accurate date conversion function
-    const currentNanakshahi = getCurrentNanakshahiDate();
-    setCurrentMonth(currentNanakshahi.month);
-    setCurrentYear(currentNanakshahi.year);
+    loadAllEvents();
   }, []);
+
+  const loadAllEvents = async () => {
+    try {
+      setIsLoading(true);
+      // Load all events from database
+      const events = await getAllEvents();
+
+      setAllEvents(events);
+    } catch (error) {
+      console.error("Failed to load events:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getEventsForDay = (day: number, month: number, year: number) => {
+    return allEvents.filter((event) => {
+      // Check if event is recurring (year doesn't matter) or matches the specific year
+      if (event.isRecurring) {
+        return event.date.day === day && event.date.month === month;
+      } else {
+        return (
+          event.date.day === day &&
+          event.date.month === month &&
+          event.date.year === year
+        );
+      }
+    });
+  };
 
   const getMonthName = (monthNumber: number) => {
     const month = NANAKSHAHI_MONTHS.find((m) => m.number === monthNumber);
@@ -181,7 +215,11 @@ const CalendarScreen: React.FC = () => {
   const renderEventsSection = () => {
     if (!selectedDate) return null;
 
-    const events = getEventsForDate(selectedDate);
+    const eventsForSelectedDate = getEventsForDay(
+      selectedDate.day,
+      selectedDate.month,
+      selectedDate.year
+    );
     const gregorianDate = nanakshahiToGregorian(selectedDate);
 
     return (
@@ -222,7 +260,7 @@ const CalendarScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {events.length === 0 ? (
+        {eventsForSelectedDate.length === 0 ? (
           <View style={styles.noEventsContainer}>
             <Text
               style={[
@@ -237,7 +275,7 @@ const CalendarScreen: React.FC = () => {
           </View>
         ) : (
           <View style={styles.eventsList}>
-            {events.map((item, index) => (
+            {eventsForSelectedDate.map((item, index) => (
               <View key={`${item.title}-${index}`}>
                 {renderEventItem({ item })}
               </View>
@@ -298,8 +336,8 @@ const CalendarScreen: React.FC = () => {
           currentYear === today.year;
 
         // Check for events on this date
-        const events = getEventsForDate(date);
-        const hasEvents = events.length > 0;
+        const dayEvents = getEventsForDay(day, currentMonth, currentYear);
+        const hasEvents = dayEvents.length > 0;
         cells.push(
           <TouchableOpacity
             key={day}
@@ -310,7 +348,7 @@ const CalendarScreen: React.FC = () => {
               hasEvents &&
                 (() => {
                   // Check for specific event types to apply different background colors
-                  const hasGurpurab = events.some(
+                  const hasGurpurab = dayEvents.some(
                     (event) =>
                       event.title.toLowerCase().includes("gurpurab") ||
                       event.title.toLowerCase().includes("guru") ||
@@ -318,7 +356,7 @@ const CalendarScreen: React.FC = () => {
                       event.title.toLowerCase().includes("ਗੁਰੂ")
                   );
 
-                  const hasHistorical = events.some(
+                  const hasHistorical = dayEvents.some(
                     (event) =>
                       event.title.toLowerCase().includes("martyrdom") ||
                       event.title.toLowerCase().includes("birth") ||
@@ -486,6 +524,7 @@ const CalendarScreen: React.FC = () => {
       fontSize: 13,
       fontWeight: "700",
     },
+
     monthYearText: {
       fontSize: 20,
       fontWeight: "700",
@@ -772,6 +811,14 @@ const CalendarScreen: React.FC = () => {
       fontSize: 12,
       color: theme === "dark" ? "#cccccc" : "#555555",
     },
+    loadingContainer: {
+      alignItems: "center",
+      paddingVertical: 40,
+    },
+    loadingText: {
+      fontSize: 16,
+      fontWeight: "500",
+    },
   });
 
   return (
@@ -869,8 +916,25 @@ const CalendarScreen: React.FC = () => {
           </View>
         </View>
 
-        {renderCalendarDays()}
-        {renderEventsSection()}
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <Text
+              style={[
+                styles.loadingText,
+                { color: theme === "dark" ? "#cccccc" : "#666666" },
+              ]}
+            >
+              {language === "pa"
+                ? "ਘਟਨਾਵਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ..."
+                : "Loading events..."}
+            </Text>
+          </View>
+        ) : (
+          <>
+            {renderCalendarDays()}
+            {renderEventsSection()}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

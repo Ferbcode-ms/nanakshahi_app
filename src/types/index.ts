@@ -19,16 +19,29 @@ export interface Event {
   title: string;
   titlePunjabi: string;
   date: NanakshahiDate;
-  type: "gurpurab" | "festival" | "historical" | "seasonal" | "personal";
-  category: "major" | "minor" | "personal";
-  priority: "high" | "medium" | "low";
-  description: string;
-  descriptionPunjabi: string;
-  significance: string;
-  significancePunjabi: string;
+  type:
+    | "gurpurab"
+    | "festival"
+    | "historical"
+    | "seasonal"
+    | "personal"
+    | "shahidi"
+    | "joti-jot";
+  category:
+    | "major"
+    | "minor"
+    | "personal"
+    | "religious"
+    | "historical"
+    | "cultural";
+  priority: "high" | "medium" | "low" | "highest";
+  description?: string;
+  descriptionPunjabi?: string;
+  significance?: string;
+  significancePunjabi?: string;
   color: string;
-  icon: string;
-  isRecurring: boolean;
+  icon?: string;
+  isRecurring?: boolean;
   gregorianDate?: GregorianDate;
 }
 

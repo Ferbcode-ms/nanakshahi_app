@@ -21,12 +21,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
-  SIKH_EVENTS,
+  initDatabase,
+  getAllEvents,
   getEventsByType,
-  getEventsByCategory,
-  getUpcomingEvents,
-  getEventsForCurrentMonth,
-} from "../data/events";
+  searchEvents,
+} from "../utils/database";
 import { Event } from "../types";
 
 const EventsScreen: React.FC = () => {
@@ -37,37 +36,51 @@ const EventsScreen: React.FC = () => {
   const navigation = useNavigation();
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(SIKH_EVENTS);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    initializeDatabase();
+  }, []);
 
   useEffect(() => {
     filterEvents();
-  }, [selectedFilter, searchQuery]);
+  }, [selectedFilter, searchQuery, allEvents]);
 
-  const filterEvents = () => {
-    let events = SIKH_EVENTS;
+  const initializeDatabase = async () => {
+    try {
+      setIsLoading(true);
+      await initDatabase();
+      const events = await getAllEvents();
+      setAllEvents(events);
+      setFilteredEvents(events);
+    } catch (error) {
+      console.error("Failed to initialize database:", error);
+      Alert.alert("Error", "Failed to load events from database");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // Apply type filter
-    if (selectedFilter !== "all") {
-      if (selectedFilter === "upcoming") {
-        events = getUpcomingEvents(30);
-      } else if (selectedFilter === "thisMonth") {
-        events = getEventsForCurrentMonth();
+  const filterEvents = async () => {
+    try {
+      let events: Event[] = [];
+
+      if (searchQuery.trim()) {
+        // Search across all events in database
+        events = await searchEvents(searchQuery);
+      } else if (selectedFilter === "all") {
+        events = allEvents;
       } else {
-        events = getEventsByType(selectedFilter as Event["type"]);
+        // Filter by type from database
+        events = await getEventsByType(selectedFilter);
       }
-    }
 
-    // Apply search filter
-    if (searchQuery.trim()) {
-      events = events.filter(
-        (event) =>
-          event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.titlePunjabi.includes(searchQuery) ||
-          event.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      setFilteredEvents(events);
+    } catch (error) {
+      console.error("Filter events error:", error);
     }
-
-    setFilteredEvents(events);
   };
 
   const getFilterButtonStyle = (filter: string) => {
@@ -135,6 +148,15 @@ const EventsScreen: React.FC = () => {
     container: {
       flex: 1,
       backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    loadingText: {
+      fontSize: 18,
+      color: theme === "dark" ? "#cccccc" : "#666666",
     },
     header: {
       backgroundColor: theme === "dark" ? "#2a2a2a" : "#ffffff",
@@ -281,6 +303,19 @@ const EventsScreen: React.FC = () => {
     },
   });
 
+  if (isLoading) {
+    return (
+      <SafeAreaView edges={["top"]} style={styles.container}>
+        <StatusBar
+          barStyle={theme === "dark" ? "light-content" : "dark-content"}
+        />
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>{t("loading")}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
       <StatusBar
@@ -324,24 +359,6 @@ const EventsScreen: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={getFilterButtonStyle("upcoming")}
-            onPress={() => setSelectedFilter("upcoming")}
-          >
-            <Text style={getFilterButtonTextStyle("upcoming")}>
-              {t("upcoming")}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={getFilterButtonStyle("thisMonth")}
-            onPress={() => setSelectedFilter("thisMonth")}
-          >
-            <Text style={getFilterButtonTextStyle("thisMonth")}>
-              {t("thisMonth")}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
             style={getFilterButtonStyle("gurpurab")}
             onPress={() => setSelectedFilter("gurpurab")}
           >
@@ -360,20 +377,20 @@ const EventsScreen: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            style={getFilterButtonStyle("shahidi")}
+            onPress={() => setSelectedFilter("shahidi")}
+          >
+            <Text style={getFilterButtonTextStyle("shahidi")}>
+              {t("shahidi")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={getFilterButtonStyle("historical")}
             onPress={() => setSelectedFilter("historical")}
           >
             <Text style={getFilterButtonTextStyle("historical")}>
               {t("historical")}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={getFilterButtonStyle("seasonal")}
-            onPress={() => setSelectedFilter("seasonal")}
-          >
-            <Text style={getFilterButtonTextStyle("seasonal")}>
-              {t("seasonal")}
             </Text>
           </TouchableOpacity>
         </ScrollView>

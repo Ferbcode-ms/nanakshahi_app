@@ -144,8 +144,12 @@ i18n.use(initReactI18next).init({
   resources,
   lng: "en", // default language
   fallbackLng: "en",
+  debug: false,
   interpolation: {
     escapeValue: false, // react already safes from xss
+  },
+  react: {
+    useSuspense: false, // This is important for React Native
   },
 });
 

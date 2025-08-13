@@ -1,11 +1,7 @@
-import { NanakshahiDate, Event } from "../types";
-import {
-  nanakshahiToGregorian,
-  gregorianToNanakshahi,
-} from "../utils/dateConverter";
+import { Event } from "../types";
 
 // Complete Sikh Events Database
-export const SIKH_EVENTS: Event[] = [
+export const SAMPLE_EVENTS: Event[] = [
   // GURPURABS (Guru Birth/Death Anniversaries)
   {
     id: "guru-nanak-birth",
@@ -1519,51 +1515,3 @@ export const SIKH_EVENTS: Event[] = [
     isRecurring: true,
   },
 ];
-
-// Helper function to get events for a specific date
-export function getEventsForDate(date: NanakshahiDate): Event[] {
-  return SIKH_EVENTS.filter(
-    (event) => event.date.day === date.day && event.date.month === date.month
-  );
-}
-
-// Helper function to get events by type
-export function getEventsByType(type: Event["type"]): Event[] {
-  return SIKH_EVENTS.filter((event) => event.type === type);
-}
-
-// Helper function to get events by category
-export function getEventsByCategory(category: Event["category"]): Event[] {
-  return SIKH_EVENTS.filter((event) => event.category === category);
-}
-
-// Helper function to get upcoming events (next 30 days)
-export function getUpcomingEvents(days: number = 30): Event[] {
-  const currentDate = new Date();
-  const upcomingEvents: Event[] = [];
-
-  for (let i = 0; i < days; i++) {
-    const futureDate = new Date(currentDate);
-    futureDate.setDate(currentDate.getDate() + i);
-
-    // Convert Gregorian date to Nanakshahi date using the proper conversion function
-    const nanakshahiDate = gregorianToNanakshahi(futureDate);
-
-    const events = getEventsForDate(nanakshahiDate);
-    upcomingEvents.push(...events);
-  }
-
-  return upcomingEvents;
-}
-
-// Helper function to get events for current month
-export function getEventsForCurrentMonth(): Event[] {
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
-
-  return SIKH_EVENTS.filter((event) => {
-    // Convert Nanakshahi date to Gregorian to check month
-    const gregDate = nanakshahiToGregorian(event.date);
-    return gregDate.month === currentMonth;
-  });
-}
