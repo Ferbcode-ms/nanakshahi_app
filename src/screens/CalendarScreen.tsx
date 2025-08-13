@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  FlatList,
   Platform,
   StatusBar,
 } from "react-native";
@@ -27,11 +26,41 @@ import {
 import { NanakshahiDate, Event } from "../types";
 import { getAllEvents } from "../utils/database";
 
+// Memoized constants to prevent recreation on every render
+const SHORT_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const SHORT_DAY_NAMES_PUNJABI = [
+  "ਐਤ",
+  "ਸੋਮ",
+  "ਮੰਗ",
+  "ਬੁੱਧ",
+  "ਵੀਰ",
+  "ਸ਼ੁਕ",
+  "ਸ਼ਨੀ",
+];
+
+// Nanakshahi month start dates in Gregorian calendar - moved outside component to prevent recreation
+const NANAKSHAHI_START_DATES = [
+  { month: 3, day: 14 }, // Chet starts on March 14
+  { month: 4, day: 13 }, // Vaisakh starts on April 13
+  { month: 5, day: 14 }, // Jeth starts on May 14
+  { month: 6, day: 15 }, // Harh starts on June 15
+  { month: 7, day: 16 }, // Sawan starts on July 16
+  { month: 8, day: 16 }, // Bhadon starts on August 16
+  { month: 9, day: 17 }, // Assu starts on September 17
+  { month: 10, day: 17 }, // Katik starts on October 17
+  { month: 11, day: 17 }, // Maghar starts on November 17
+  { month: 12, day: 18 }, // Poh starts on December 18
+  { month: 1, day: 17 }, // Magh starts on January 17
+  { month: 2, day: 17 }, // Phagan starts on February 17
+];
+
 const CalendarScreen: React.FC = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { language } = useLanguage();
   const insets = useSafeAreaInsets();
+
+  // Initialize with current date using lazy initialization
   const [currentMonth, setCurrentMonth] = useState<number>(() => {
     const currentDate = getCurrentNanakshahiDate();
     return currentDate.month;
@@ -44,111 +73,118 @@ const CalendarScreen: React.FC = () => {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadAllEvents();
-  }, []);
+  // Memoized current date to prevent recalculation
+  const currentNanakshahiDate = useMemo(() => getCurrentNanakshahiDate(), []);
 
-  const loadAllEvents = async () => {
+  // Memoized month name to prevent recalculation on every render
+  const monthName = useMemo(() => {
+    const month = NANAKSHAHI_MONTHS.find((m) => m.number === currentMonth);
+    return language === "pa" ? month?.namePunjabi : month?.name;
+  }, [currentMonth, language]);
+
+  // Memoized days in month calculation
+  const daysInMonth = useMemo(() => {
+    const monthData = NANAKSHAHI_MONTHS.find((m) => m.number === currentMonth);
+    return monthData?.days || 30;
+  }, [currentMonth]);
+
+  // Memoized first day of month calculation
+  const firstDayOfMonth = useMemo(() => {
+    const startDate = NANAKSHAHI_START_DATES[currentMonth - 1];
+    const gregorianDate = new Date(
+      currentYear + 1469 - 1,
+      startDate.month - 1,
+      startDate.day
+    );
+    return gregorianDate.getDay();
+  }, [currentMonth, currentYear]);
+
+  // Memoized day names to prevent recreation
+  const dayNames = useMemo(() => {
+    return language === "pa" ? SHORT_DAY_NAMES_PUNJABI : SHORT_DAY_NAMES;
+  }, [language]);
+
+  // Memoized styles to prevent recreation on every render
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // Callback for loading events to prevent recreation
+  const loadAllEvents = useCallback(async () => {
     try {
       setIsLoading(true);
-      // Load all events from database
       const events = await getAllEvents();
-
       setAllEvents(events);
     } catch (error) {
       console.error("Failed to load events:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const getEventsForDay = (day: number, month: number, year: number) => {
-    return allEvents.filter((event) => {
-      // Check if event is recurring (year doesn't matter) or matches the specific year
-      if (event.isRecurring) {
-        return event.date.day === day && event.date.month === month;
+  // Callback for getting events for a specific day
+  const getEventsForDay = useCallback(
+    (day: number, month: number, year: number) => {
+      return allEvents.filter((event) => {
+        if (event.isRecurring) {
+          return event.date.day === day && event.date.month === month;
+        } else {
+          return (
+            event.date.day === day &&
+            event.date.month === month &&
+            event.date.year === year
+          );
+        }
+      });
+    },
+    [allEvents]
+  );
+
+  // Callback for changing month
+  const changeMonth = useCallback(
+    (direction: "prev" | "next") => {
+      if (direction === "prev") {
+        if (currentMonth === 1) {
+          setCurrentMonth(12);
+          setCurrentYear(currentYear - 1);
+        } else {
+          setCurrentMonth(currentMonth - 1);
+        }
       } else {
-        return (
-          event.date.day === day &&
-          event.date.month === month &&
-          event.date.year === year
-        );
+        if (currentMonth === 12) {
+          setCurrentMonth(1);
+          setCurrentYear(currentYear + 1);
+        } else {
+          setCurrentMonth(currentMonth + 1);
+        }
       }
-    });
-  };
+    },
+    [currentMonth, currentYear]
+  );
 
-  const getMonthName = (monthNumber: number) => {
-    const month = NANAKSHAHI_MONTHS.find((m) => m.number === monthNumber);
-    return language === "pa" ? month?.namePunjabi : month?.name;
-  };
+  // Callback for going to current date
+  const goToCurrentDate = useCallback(() => {
+    setCurrentMonth(currentNanakshahiDate.month);
+    setCurrentYear(currentNanakshahiDate.year);
+    setSelectedDate(null);
+  }, [currentNanakshahiDate]);
 
-  const getDaysInMonth = (month: number, year: number) => {
-    const monthData = NANAKSHAHI_MONTHS.find((m) => m.number === month);
-    return monthData?.days || 30;
-  };
+  // Callback for selecting a date
+  const handleDateSelect = useCallback((date: NanakshahiDate) => {
+    setSelectedDate(date);
+  }, []);
 
-  const getDayName = (dayIndex: number) => {
-    return language === "pa"
-      ? DAY_NAMES_PUNJABI[dayIndex]
-      : DAY_NAMES[dayIndex];
-  };
+  // Callback for closing events section
+  const handleCloseEvents = useCallback(() => {
+    setSelectedDate(null);
+  }, []);
 
-  const getFirstDayOfMonth = (month: number, year: number) => {
-    // For Nanakshahi calendar, we need to calculate the day of week for the 1st of the month
-    // Since Nanakshahi months have fixed start dates in Gregorian calendar, we can use those
+  // Load events on mount
+  useEffect(() => {
+    loadAllEvents();
+  }, [loadAllEvents]);
 
-    // Nanakshahi month start dates in Gregorian calendar
-    const NANAKSHAHI_START_DATES = [
-      { month: 3, day: 14 }, // Chet starts on March 14
-      { month: 4, day: 13 }, // Vaisakh starts on April 13
-      { month: 5, day: 14 }, // Jeth starts on May 14
-      { month: 6, day: 15 }, // Harh starts on June 15
-      { month: 7, day: 16 }, // Sawan starts on July 16
-      { month: 8, day: 16 }, // Bhadon starts on August 16
-      { month: 9, day: 17 }, // Assu starts on September 17
-      { month: 10, day: 17 }, // Katik starts on October 17
-      { month: 11, day: 17 }, // Maghar starts on November 17
-      { month: 12, day: 18 }, // Poh starts on December 18
-      { month: 1, day: 17 }, // Magh starts on January 17
-      { month: 2, day: 17 }, // Phagan starts on February 17
-    ];
-
-    // Get the Gregorian start date for this Nanakshahi month
-    const startDate = NANAKSHAHI_START_DATES[month - 1];
-
-    // Create a Date object for the 1st of this Nanakshahi month
-    const gregorianDate = new Date(
-      year + 1469 - 1,
-      startDate.month - 1,
-      startDate.day
-    );
-
-    // Return the day of week (0 = Sunday, 1 = Monday, etc.)
-    return gregorianDate.getDay();
-  };
-
-  const getDayOfWeekForDate = (day: number, month: number, year: number) => {
-    // Calculate which day of the week a specific date falls on
-    const firstDayOfMonth = getFirstDayOfMonth(month, year);
-    // Calculate the day of week for the specific date
-    // (firstDayOfMonth + day - 1) % 7 gives us the day of week (0 = Sunday, 1 = Monday, etc.)
-    return (firstDayOfMonth + day - 1) % 7;
-  };
-
-  // Short day names for headers
-  const SHORT_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const SHORT_DAY_NAMES_PUNJABI = [
-    "ਐਤ",
-    "ਸੋਮ",
-    "ਮੰਗ",
-    "ਬੁੱਧ",
-    "ਵੀਰ",
-    "ਸ਼ੁਕ",
-    "ਸ਼ਨੀ",
-  ];
-
-  const renderEventItem = ({ item }: { item: Event }) => {
-    const getEventTypeColor = (type: string) => {
+  // Memoized event type color function
+  const getEventTypeColor = useCallback(
+    (type: string) => {
       switch (type) {
         case "gurpurab":
           return theme === "dark" ? "#FFD700" : "#FFC107";
@@ -163,56 +199,66 @@ const CalendarScreen: React.FC = () => {
         default:
           return theme === "dark" ? "#757575" : "#757575";
       }
-    };
+    },
+    [theme]
+  );
 
-    return (
-      <View
-        style={[
-          styles.eventItem,
-          { borderLeftColor: getEventTypeColor(item.type) },
-        ]}
-      >
-        <View style={styles.eventHeader}>
-          <Text
-            style={[
-              styles.eventTitle,
-              { color: theme === "dark" ? "#ffffff" : "#333333" },
-            ]}
-          >
-            {language === "pa" ? item.titlePunjabi : item.title}
-          </Text>
-          <View
-            style={[
-              styles.eventTypeBadge,
-              { backgroundColor: getEventTypeColor(item.type) },
-            ]}
-          >
-            <Text style={styles.eventTypeText}>{item.type.toUpperCase()}</Text>
-          </View>
-        </View>
-        <Text
+  // Memoized render event item function
+  const renderEventItem = useCallback(
+    ({ item }: { item: Event }) => {
+      return (
+        <View
           style={[
-            styles.eventDescription,
-            { color: theme === "dark" ? "#cccccc" : "#666666" },
+            styles.eventItem,
+            { borderLeftColor: getEventTypeColor(item.type) },
           ]}
         >
-          {language === "pa" ? item.descriptionPunjabi : item.description}
-        </Text>
-        {item.significance && (
+          <View style={styles.eventHeader}>
+            <Text
+              style={[
+                styles.eventTitle,
+                { color: theme === "dark" ? "#ffffff" : "#333333" },
+              ]}
+            >
+              {language === "pa" ? item.titlePunjabi : item.title}
+            </Text>
+            <View
+              style={[
+                styles.eventTypeBadge,
+                { backgroundColor: getEventTypeColor(item.type) },
+              ]}
+            >
+              <Text style={styles.eventTypeText}>
+                {item.type.toUpperCase()}
+              </Text>
+            </View>
+          </View>
           <Text
             style={[
-              styles.eventSignificance,
-              { color: theme === "dark" ? "#FF9800" : "#FF5722" },
+              styles.eventDescription,
+              { color: theme === "dark" ? "#cccccc" : "#666666" },
             ]}
           >
-            {language === "pa" ? item.significancePunjabi : item.significance}
+            {language === "pa" ? item.descriptionPunjabi : item.description}
           </Text>
-        )}
-      </View>
-    );
-  };
+          {item.significance && (
+            <Text
+              style={[
+                styles.eventSignificance,
+                { color: theme === "dark" ? "#FF9800" : "#FF5722" },
+              ]}
+            >
+              {language === "pa" ? item.significancePunjabi : item.significance}
+            </Text>
+          )}
+        </View>
+      );
+    },
+    [styles, getEventTypeColor, theme, language]
+  );
 
-  const renderEventsSection = () => {
+  // Memoized events section
+  const eventsSection = useMemo(() => {
     if (!selectedDate) return null;
 
     const eventsForSelectedDate = getEventsForDay(
@@ -240,14 +286,14 @@ const CalendarScreen: React.FC = () => {
                 { color: theme === "dark" ? "#cccccc" : "#666666" },
               ]}
             >
-              {selectedDate.day} {getMonthName(selectedDate.month)}{" "}
-              {selectedDate.year} ({gregorianDate.day} {gregorianDate.monthName}{" "}
-              {gregorianDate.year})
+              {selectedDate.day} {monthName} {selectedDate.year} (
+              {gregorianDate.day} {gregorianDate.monthName} {gregorianDate.year}
+              )
             </Text>
           </View>
           <TouchableOpacity
             style={styles.closeButton}
-            onPress={() => setSelectedDate(null)}
+            onPress={handleCloseEvents}
           >
             <Text
               style={[
@@ -276,7 +322,7 @@ const CalendarScreen: React.FC = () => {
         ) : (
           <View style={styles.eventsList}>
             {eventsForSelectedDate.map((item, index) => (
-              <View key={`${item.title}-${index}`}>
+              <View key={`${item.id}-${index}`}>
                 {renderEventItem({ item })}
               </View>
             ))}
@@ -284,28 +330,29 @@ const CalendarScreen: React.FC = () => {
         )}
       </View>
     );
-  };
+  }, [
+    selectedDate,
+    getEventsForDay,
+    styles,
+    theme,
+    language,
+    monthName,
+    renderEventItem,
+    handleCloseEvents,
+  ]);
 
-  const renderCalendarDays = () => {
-    const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-    const firstDayOfMonth = getFirstDayOfMonth(currentMonth, currentYear);
+  // Memoized calendar days
+  const calendarDays = useMemo(() => {
     const totalCells = daysInMonth + firstDayOfMonth;
     const rows = [];
     let cells: React.ReactNode[] = [];
 
     // Add short day headers
-    const dayHeaders = [];
-    for (let i = 0; i < 7; i++) {
-      dayHeaders.push(
-        <View key={`header-${i}`} style={styles.dayHeader}>
-          <Text style={styles.dayHeaderText}>
-            {language === "pa"
-              ? SHORT_DAY_NAMES_PUNJABI[i]
-              : SHORT_DAY_NAMES[i]}
-          </Text>
-        </View>
-      );
-    }
+    const dayHeaders = dayNames.map((dayName, i) => (
+      <View key={`header-${i}`} style={styles.dayHeader}>
+        <Text style={styles.dayHeaderText}>{dayName}</Text>
+      </View>
+    ));
 
     // Fill the grid with empty cells and day cells
     for (let i = 0; i < totalCells; i++) {
@@ -322,56 +369,58 @@ const CalendarScreen: React.FC = () => {
           year: currentYear,
           month: currentMonth,
           day,
-          monthName: getMonthName(currentMonth) || "",
+          monthName: monthName || "",
         };
         const isSelected =
           selectedDate?.day === day &&
           selectedDate?.month === currentMonth &&
           selectedDate?.year === currentYear;
-        // Add today cell logic
-        const today = getCurrentNanakshahiDate();
+
         const isToday =
-          day === today.day &&
-          currentMonth === today.month &&
-          currentYear === today.year;
+          day === currentNanakshahiDate.day &&
+          currentMonth === currentNanakshahiDate.month &&
+          currentYear === currentNanakshahiDate.year;
 
         // Check for events on this date
         const dayEvents = getEventsForDay(day, currentMonth, currentYear);
         const hasEvents = dayEvents.length > 0;
+
+        // Determine cell style based on events
+        const cellStyle = [
+          styles.dayCell,
+          isSelected && styles.selectedDay,
+          isToday && styles.todayCell,
+          hasEvents &&
+            (() => {
+              const hasGurpurab = dayEvents.some(
+                (event) =>
+                  event.title.toLowerCase().includes("gurpurab") ||
+                  event.title.toLowerCase().includes("guru") ||
+                  event.title.toLowerCase().includes("ਗੁਰਪੁਰਬ") ||
+                  event.title.toLowerCase().includes("ਗੁਰੂ")
+              );
+
+              const hasHistorical = dayEvents.some(
+                (event) =>
+                  event.title.toLowerCase().includes("martyrdom") ||
+                  event.title.toLowerCase().includes("birth") ||
+                  event.title.toLowerCase().includes("death") ||
+                  event.title.toLowerCase().includes("ਸ਼ਹੀਦੀ") ||
+                  event.title.toLowerCase().includes("ਜਨਮ") ||
+                  event.title.toLowerCase().includes("ਦੇਹਾਂਤ")
+              );
+
+              if (hasGurpurab) return styles.dayCellWithGurpurab;
+              if (hasHistorical) return styles.dayCellWithHistorical;
+              return styles.dayCellWithEvents;
+            })(),
+        ].filter(Boolean);
+
         cells.push(
           <TouchableOpacity
             key={day}
-            style={[
-              styles.dayCell,
-              isSelected && styles.selectedDay,
-              isToday && styles.todayCell,
-              hasEvents &&
-                (() => {
-                  // Check for specific event types to apply different background colors
-                  const hasGurpurab = dayEvents.some(
-                    (event) =>
-                      event.title.toLowerCase().includes("gurpurab") ||
-                      event.title.toLowerCase().includes("guru") ||
-                      event.title.toLowerCase().includes("ਗੁਰਪੁਰਬ") ||
-                      event.title.toLowerCase().includes("ਗੁਰੂ")
-                  );
-
-                  const hasHistorical = dayEvents.some(
-                    (event) =>
-                      event.title.toLowerCase().includes("martyrdom") ||
-                      event.title.toLowerCase().includes("birth") ||
-                      event.title.toLowerCase().includes("death") ||
-                      event.title.toLowerCase().includes("ਸ਼ਹੀਦੀ") ||
-                      event.title.toLowerCase().includes("ਜਨਮ") ||
-                      event.title.toLowerCase().includes("ਦੇਹਾਂਤ")
-                  );
-
-                  if (hasGurpurab) return styles.dayCellWithGurpurab;
-                  if (hasHistorical) return styles.dayCellWithHistorical;
-                  return styles.dayCellWithEvents;
-                })(),
-            ]}
-            onPress={() => setSelectedDate(date)}
+            style={cellStyle}
+            onPress={() => handleDateSelect(date)}
           >
             <Text
               style={[
@@ -382,15 +431,12 @@ const CalendarScreen: React.FC = () => {
             >
               {language === "pa" ? day.toLocaleString("pa-IN") : day}
             </Text>
-            {/* Gregorian date below Nanakshahi date */}
             <Text style={styles.gregorianDateText}>
               {(() => {
                 const greg = nanakshahiToGregorian(date);
-                // Show day and month in Punjabi if language is pa
                 if (language === "pa") {
-                  // Convert numbers to Gurmukhi digits
                   const paDay = greg.day.toLocaleString("pa-IN");
-                  const paMonth = greg.monthName === "" ? "" : greg.monthName; // Optionally map to Punjabi month names
+                  const paMonth = greg.monthName === "" ? "" : greg.monthName;
                   return `${paDay} ${paMonth}`;
                 } else {
                   return `${greg.day} ${greg.monthName.substr(0, 3)}`;
@@ -400,6 +446,7 @@ const CalendarScreen: React.FC = () => {
           </TouchableOpacity>
         );
       }
+
       // If we've filled a row, push it and reset
       if ((i + 1) % 7 === 0) {
         rows.push(
@@ -410,6 +457,7 @@ const CalendarScreen: React.FC = () => {
         cells = [];
       }
     }
+
     // Push any remaining cells (for the last row)
     if (cells.length > 0) {
       while (cells.length < 7) {
@@ -425,40 +473,167 @@ const CalendarScreen: React.FC = () => {
         </View>
       );
     }
+
     return (
       <View style={styles.calendarContainer}>
         <View style={styles.dayHeaders}>{dayHeaders}</View>
         <View>{rows}</View>
       </View>
     );
-  };
+  }, [
+    daysInMonth,
+    firstDayOfMonth,
+    dayNames,
+    styles,
+    currentYear,
+    currentMonth,
+    monthName,
+    selectedDate,
+    currentNanakshahiDate,
+    getEventsForDay,
+    language,
+    handleDateSelect,
+  ]);
 
-  const changeMonth = (direction: "prev" | "next") => {
-    if (direction === "prev") {
-      if (currentMonth === 1) {
-        setCurrentMonth(12);
-        setCurrentYear(currentYear - 1);
-      } else {
-        setCurrentMonth(currentMonth - 1);
-      }
-    } else {
-      if (currentMonth === 12) {
-        setCurrentMonth(1);
-        setCurrentYear(currentYear + 1);
-      } else {
-        setCurrentMonth(currentMonth + 1);
-      }
-    }
-  };
+  // Memoized legend
+  const legend = useMemo(
+    () => (
+      <View style={styles.legendContainer}>
+        <View style={styles.legendItem}>
+          <View
+            style={[
+              styles.legendBox,
+              {
+                backgroundColor: theme === "dark" ? "#4a3a1a" : "#fff8e1",
+                borderColor: theme === "dark" ? "#ffd54f" : "#ffc107",
+              },
+            ]}
+          />
+          <Text style={styles.legendText}>
+            {language === "pa" ? "ਗੁਰਪੁਰਬ" : "Gurpurab"}
+          </Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View
+            style={[
+              styles.legendBox,
+              {
+                backgroundColor: theme === "dark" ? "#1a3a1a" : "#e8f5e8",
+                borderColor: "#4caf50",
+              },
+            ]}
+          />
+          <Text style={styles.legendText}>
+            {language === "pa" ? "ਇਤਿਹਾਸਿਕ" : "Historical"}
+          </Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View
+            style={[
+              styles.legendBox,
+              {
+                backgroundColor: theme === "dark" ? "#3a3a3a" : "#f8f9fa",
+                borderColor: theme === "dark" ? "#4a4a4a" : "#e0e0e0",
+              },
+            ]}
+          />
+          <Text style={styles.legendText}>
+            {language === "pa" ? "ਹੋਰ" : "Other"}
+          </Text>
+        </View>
+      </View>
+    ),
+    [styles, theme, language]
+  );
 
-  const goToCurrentDate = () => {
-    const currentNanakshahi = getCurrentNanakshahiDate();
-    setCurrentMonth(currentNanakshahi.month);
-    setCurrentYear(currentNanakshahi.year);
-    setSelectedDate(null); // Clear any selected date
-  };
+  // Memoized loading component
+  const loadingComponent = useMemo(
+    () => (
+      <View style={styles.loadingContainer}>
+        <Text
+          style={[
+            styles.loadingText,
+            { color: theme === "dark" ? "#cccccc" : "#666666" },
+          ]}
+        >
+          {language === "pa"
+            ? "ਘਟਨਾਵਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ..."
+            : "Loading events..."}
+        </Text>
+      </View>
+    ),
+    [styles, theme, language]
+  );
 
-  const styles = StyleSheet.create({
+  return (
+    <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
+      <StatusBar
+        barStyle={theme === "dark" ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent
+      />
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <Text style={styles.calendarTitle}>
+            📅 {language === "pa" ? "ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ" : "Nanakshahi Calendar"}
+          </Text>
+        </View>
+        <View style={styles.headerBottom}>
+          <TouchableOpacity
+            style={styles.navigationButton}
+            onPress={() => changeMonth("prev")}
+          >
+            <Text style={styles.navigationButtonText}>‹</Text>
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.monthYearText}>
+              {monthName} {currentYear}
+            </Text>
+            <TouchableOpacity
+              style={styles.currentDateButton}
+              onPress={goToCurrentDate}
+            >
+              <Text style={styles.currentDateButtonText}>
+                🎯 {language === "pa" ? "ਆਜ ਦਾ ਦਿਨ" : "Today"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={styles.navigationButton}
+            onPress={() => changeMonth("next")}
+          >
+            <Text style={styles.navigationButtonText}>›</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView
+        style={styles.calendarContainer}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? 120 + insets.bottom : 120,
+        }}
+      >
+        {legend}
+        {isLoading ? (
+          loadingComponent
+        ) : (
+          <>
+            {calendarDays}
+            {eventsSection}
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+// Memoize the entire component to prevent unnecessary re-renders
+export default React.memo(CalendarScreen);
+
+// Move styles outside component to prevent recreation on every render
+const createStyles = (theme: "light" | "dark") =>
+  StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
@@ -514,7 +689,10 @@ const CalendarScreen: React.FC = () => {
       borderRadius: 20,
       marginTop: 8,
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
       shadowOpacity: 0.25,
       shadowRadius: 4,
       elevation: 4,
@@ -524,7 +702,6 @@ const CalendarScreen: React.FC = () => {
       fontSize: 13,
       fontWeight: "700",
     },
-
     monthYearText: {
       fontSize: 20,
       fontWeight: "700",
@@ -665,7 +842,6 @@ const CalendarScreen: React.FC = () => {
       marginTop: 2,
       fontWeight: "600",
     },
-
     eventsSection: {
       marginTop: 20,
       marginBottom: 0,
@@ -735,7 +911,7 @@ const CalendarScreen: React.FC = () => {
       borderRadius: 12,
       marginBottom: 12,
       borderLeftWidth: 6,
-      borderLeftColor: "#FF9800", // Default color, will be overridden by renderEventItem
+      borderLeftColor: "#FF9800",
       backgroundColor: theme === "dark" ? "#3a3a3a" : "#ffffff",
       borderWidth: 1,
       borderColor: theme === "dark" ? "#4a4a4a" : "#e0e0e0",
@@ -804,7 +980,7 @@ const CalendarScreen: React.FC = () => {
       height: 15,
       borderRadius: 3,
       borderWidth: 1,
-      borderColor: "#ccc", // Default border color
+      borderColor: "#ccc",
       marginRight: 8,
     },
     legendText: {
@@ -820,124 +996,3 @@ const CalendarScreen: React.FC = () => {
       fontWeight: "500",
     },
   });
-
-  return (
-    <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
-      <StatusBar
-        barStyle={theme === "dark" ? "light-content" : "dark-content"}
-        backgroundColor="transparent"
-        translucent
-      />
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.calendarTitle}>
-            📅 {language === "pa" ? "ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ" : "Nanakshahi Calendar"}
-          </Text>
-        </View>
-        <View style={styles.headerBottom}>
-          <TouchableOpacity
-            style={styles.navigationButton}
-            onPress={() => changeMonth("prev")}
-          >
-            <Text style={styles.navigationButtonText}>‹</Text>
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <Text style={styles.monthYearText}>
-              {getMonthName(currentMonth)} {currentYear}
-            </Text>
-            <TouchableOpacity
-              style={styles.currentDateButton}
-              onPress={goToCurrentDate}
-            >
-              <Text style={styles.currentDateButtonText}>
-                🎯 {language === "pa" ? "ਆਜ ਦਾ ਦਿਨ" : "Today"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            style={styles.navigationButton}
-            onPress={() => changeMonth("next")}
-          >
-            <Text style={styles.navigationButtonText}>›</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView
-        style={styles.calendarContainer}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: Platform.OS === "ios" ? 120 + insets.bottom : 120,
-        }}
-      >
-        {/* Event Color Legend */}
-        <View style={styles.legendContainer}>
-          <View style={styles.legendItem}>
-            <View
-              style={[
-                styles.legendBox,
-                {
-                  backgroundColor: theme === "dark" ? "#4a3a1a" : "#fff8e1",
-                  borderColor: theme === "dark" ? "#ffd54f" : "#ffc107",
-                },
-              ]}
-            />
-            <Text style={styles.legendText}>
-              {language === "pa" ? "ਗੁਰਪੁਰਬ" : "Gurpurab"}
-            </Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View
-              style={[
-                styles.legendBox,
-                {
-                  backgroundColor: theme === "dark" ? "#1a3a1a" : "#e8f5e8",
-                  borderColor: "#4caf50",
-                },
-              ]}
-            />
-            <Text style={styles.legendText}>
-              {language === "pa" ? "ਇਤਿਹਾਸਿਕ" : "Historical"}
-            </Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View
-              style={[
-                styles.legendBox,
-                {
-                  backgroundColor: theme === "dark" ? "#3a3a3a" : "#f8f9fa",
-                  borderColor: theme === "dark" ? "#4a4a4a" : "#e0e0e0",
-                },
-              ]}
-            />
-            <Text style={styles.legendText}>
-              {language === "pa" ? "ਹੋਰ" : "Other"}
-            </Text>
-          </View>
-        </View>
-
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <Text
-              style={[
-                styles.loadingText,
-                { color: theme === "dark" ? "#cccccc" : "#666666" },
-              ]}
-            >
-              {language === "pa"
-                ? "ਘਟਨਾਵਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ..."
-                : "Loading events..."}
-            </Text>
-          </View>
-        ) : (
-          <>
-            {renderCalendarDays()}
-            {renderEventsSection()}
-          </>
-        )}
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
-export default CalendarScreen;

@@ -4,6 +4,8 @@ import React, {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
+  useMemo,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "i18next";
@@ -35,11 +37,8 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
 }) => {
   const [language, setLanguageState] = useState<"en" | "pa">("en");
 
-  useEffect(() => {
-    loadLanguage();
-  }, []);
-
-  const loadLanguage = async () => {
+  // Callback for loading language to prevent recreation
+  const loadLanguage = useCallback(async () => {
     try {
       const savedLanguage = await AsyncStorage.getItem("language");
       if (savedLanguage && (savedLanguage === "en" || savedLanguage === "pa")) {
@@ -52,9 +51,10 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
       // Fallback to default language
       setLanguageState("en");
     }
-  };
+  }, []);
 
-  const setLanguage = async (newLanguage: "en" | "pa") => {
+  // Callback for setting language to prevent recreation
+  const setLanguage = useCallback(async (newLanguage: "en" | "pa") => {
     try {
       await AsyncStorage.setItem("language", newLanguage);
       setLanguageState(newLanguage);
@@ -64,15 +64,31 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
       // Still update the state even if saving fails
       setLanguageState(newLanguage);
     }
-  };
+  }, []);
 
-  const toggleLanguage = () => {
+  // Callback for toggling language to prevent recreation
+  const toggleLanguage = useCallback(() => {
     const newLanguage = language === "en" ? "pa" : "en";
     setLanguage(newLanguage);
-  };
+  }, [language, setLanguage]);
+
+  // Load language on mount
+  useEffect(() => {
+    loadLanguage();
+  }, [loadLanguage]);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      language,
+      setLanguage,
+      toggleLanguage,
+    }),
+    [language, setLanguage, toggleLanguage]
+  );
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );
