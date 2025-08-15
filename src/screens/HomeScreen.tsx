@@ -315,7 +315,7 @@ const HomeScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.container}>
+    <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
       <StatusBar
         barStyle={theme === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme === "dark" ? "#0a0a0a" : "#f8f9fa"}

@@ -30,8 +30,9 @@ const SettingsScreen: React.FC = () => {
   const buildNumber = "1";
 
   // Donation and contact links
-  const fiverrLink = "https://www.fiverr.com/ferbcode";
-  const gumroadLink = "https://gumroad.com/ferbcode";
+  const instaLink =
+    "https://www.instagram.com/ferbcode.ms?igsh=MWloNHF3d3hhZ3luNg==";
+  const gumroadLink = "https://ferbcode.gumroad.com/l/wjlfpt";
 
   // Memoized styles to prevent recreation
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -63,9 +64,9 @@ const SettingsScreen: React.FC = () => {
 
   // Callback for handling donations
   const handleDonation = useCallback(
-    (platform: "fiverr" | "gumroad") => {
-      const link = platform === "fiverr" ? fiverrLink : gumroadLink;
-      const title = platform === "fiverr" ? "Fiverr" : "Gumroad";
+    (platform: "insta" | "gumroad") => {
+      const link = platform === "insta" ? instaLink : gumroadLink;
+      const title = platform === "insta" ? "Instagram" : "Gumroad";
       openLink(link, title);
     },
     [openLink]
@@ -315,24 +316,26 @@ const SettingsScreen: React.FC = () => {
 
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => handleDonation("fiverr")}
+            onPress={() => handleDonation("insta")}
           >
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
                 <MaterialIcons
-                  name="work"
+                  name="camera-alt"
                   size={24}
-                  color={theme === "dark" ? "#00C851" : "#4CAF50"}
+                  color={theme === "dark" ? "#E1306C" : "#E1306C"}
                 />
               </View>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>
-                  {language === "pa" ? "Fiverr ਪ੍ਰੋਫਾਈਲ" : "Fiverr Profile"}
+                  {language === "pa"
+                    ? "Instagram ਪ੍ਰੋਫਾਈਲ"
+                    : "Instagram Profile"}
                 </Text>
                 <Text style={styles.settingDescription}>
                   {language === "pa"
-                    ? "ਡਿਵੈਲਪਰ ਦਾ Fiverr ਪ੍ਰੋਫਾਈਲ ਦੇਖੋ"
-                    : "View developer's Fiverr profile"}
+                    ? "ਡਿਵੈਲਪਰ ਨੂੰ Instagram ਤੇ ਫਾਲੋ ਕਰੋ"
+                    : "Follow the developer on Instagram"}
                 </Text>
               </View>
             </View>
