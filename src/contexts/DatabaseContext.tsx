@@ -11,7 +11,6 @@ import {
   getAllEvents,
 } from "../utils/database";
 import { SAMPLE_EVENTS } from "../data/sampleEvents";
-import { scheduleEventNotification } from "../utils/notifications";
 
 interface DatabaseContextType {
   isDatabaseReady: boolean;
@@ -57,21 +56,6 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
           const verifyEvents = await getAllEvents();
           if (verifyEvents.length === 0) {
             throw new Error("Events were not inserted successfully");
-          }
-
-          // Schedule notifications for all events
-          for (const event of verifyEvents) {
-            if (event.isRecurring) {
-              await scheduleEventNotification(event);
-            }
-          }
-        } else {
-          // Schedule notifications for existing events if not already scheduled
-          const scheduledNotifications = await getAllEvents();
-          for (const event of scheduledNotifications) {
-            if (event.isRecurring) {
-              await scheduleEventNotification(event);
-            }
           }
         }
 

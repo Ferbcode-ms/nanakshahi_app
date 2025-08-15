@@ -18,21 +18,12 @@ import {
   SafeAreaView,
 } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  requestNotificationPermissions,
-  cancelAllNotifications,
-  getScheduledNotifications,
-} from "../utils/notifications";
 
 const SettingsScreen: React.FC = () => {
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage } = useLanguage();
   const insets = useSafeAreaInsets();
-
-  // Notification state
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(false);
-  const [scheduledCount, setScheduledCount] = React.useState(0);
 
   // App version and build info
   const appVersion = "1.0.0";
@@ -79,64 +70,6 @@ const SettingsScreen: React.FC = () => {
     },
     [openLink]
   );
-
-  // Notification permission handling
-  const handleNotificationPermission = useCallback(async () => {
-    try {
-      const granted = await requestNotificationPermissions();
-      if (granted) {
-        setNotificationsEnabled(true);
-        // Refresh scheduled count
-        const notifications = await getScheduledNotifications();
-        setScheduledCount(notifications.length);
-        Alert.alert(
-          language === "pa" ? "ਸਫਲ" : "Success",
-          language === "pa" ? "ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ ਸਮਰੱਥ ਹਨ" : "Notifications enabled"
-        );
-      } else {
-        setNotificationsEnabled(false);
-        Alert.alert(
-          language === "pa" ? "ਅਸਫਲ" : "Failed",
-          language === "pa"
-            ? "ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਮਿਲੀ"
-            : "Notification permission denied"
-        );
-      }
-    } catch (error) {
-      console.error("Error handling notification permission:", error);
-    }
-  }, [language]);
-
-  const handleDisableNotifications = useCallback(async () => {
-    try {
-      await cancelAllNotifications();
-      setNotificationsEnabled(false);
-      setScheduledCount(0);
-      Alert.alert(
-        language === "pa" ? "ਸਫਲ" : "Success",
-        language === "pa"
-          ? "ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ ਅਯੋਗ ਕੀਤੀਆਂ ਗਈਆਂ"
-          : "Notifications disabled"
-      );
-    } catch (error) {
-      console.error("Error disabling notifications:", error);
-    }
-  }, [language]);
-
-  // Check notification status on mount
-  useEffect(() => {
-    const checkNotificationStatus = async () => {
-      try {
-        const notifications = await getScheduledNotifications();
-        setScheduledCount(notifications.length);
-        setNotificationsEnabled(notifications.length > 0);
-      } catch (error) {
-        console.error("Error checking notification status:", error);
-      }
-    };
-
-    checkNotificationStatus();
-  }, []);
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
@@ -226,89 +159,6 @@ const SettingsScreen: React.FC = () => {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Notification Settings */}
-        <View style={styles.settingsCard}>
-          <Text style={styles.cardTitle}>
-            {language === "pa"
-              ? "ਨੋਟੀਫਿਕੇਸ਼ਨ ਸੈਟਿੰਗਾਂ"
-              : "Notification Settings"}
-          </Text>
-
-          <View style={styles.settingItem}>
-            <View style={styles.settingLeft}>
-              <View style={styles.settingIcon}>
-                <MaterialIcons
-                  name="notifications"
-                  size={24}
-                  color={theme === "dark" ? "#FF9800" : "#FF5722"}
-                />
-              </View>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingTitle}>
-                  {language === "pa" ? "ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ" : "Notifications"}
-                </Text>
-                <Text style={styles.settingDescription}>
-                  {language === "pa"
-                    ? "ਘਟਨਾਵਾਂ ਲਈ ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ ਪ੍ਰਾਪਤ ਕਰੋ"
-                    : "Get notified about events"}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                notificationsEnabled && styles.toggleButtonActive,
-              ]}
-              onPress={
-                notificationsEnabled
-                  ? handleDisableNotifications
-                  : handleNotificationPermission
-              }
-            >
-              <Text
-                style={[
-                  styles.toggleButtonText,
-                  notificationsEnabled && styles.toggleButtonTextActive,
-                ]}
-              >
-                {notificationsEnabled
-                  ? language === "pa"
-                    ? "ਅਯੋਗ"
-                    : "Disable"
-                  : language === "pa"
-                  ? "ਸਮਰੱਥ"
-                  : "Enable"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {notificationsEnabled && (
-            <View style={styles.settingItem}>
-              <View style={styles.settingLeft}>
-                <View style={styles.settingIcon}>
-                  <MaterialIcons
-                    name="schedule"
-                    size={24}
-                    color={theme === "dark" ? "#4CAF50" : "#388E3C"}
-                  />
-                </View>
-                <View style={styles.settingInfo}>
-                  <Text style={styles.settingTitle}>
-                    {language === "pa"
-                      ? "ਸ਼ੈਡਿਊਲਡ ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ"
-                      : "Scheduled Notifications"}
-                  </Text>
-                  <Text style={styles.settingDescription}>
-                    {language === "pa"
-                      ? `${scheduledCount} ਨੋਟੀਫਿਕੇਸ਼ਨਾਂ ਸ਼ੈਡਿਊਲ ਕੀਤੀਆਂ ਗਈਆਂ`
-                      : `${scheduledCount} notifications scheduled`}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          )}
         </View>
 
         {/* App Information */}
@@ -650,13 +500,6 @@ const createStyles = (theme: "light" | "dark") =>
       fontSize: 14,
       fontWeight: "600",
       color: theme === "dark" ? "#ffffff" : "#333333",
-    },
-    toggleButtonActive: {
-      backgroundColor: theme === "dark" ? "#4CAF50" : "#388E3C",
-      borderColor: theme === "dark" ? "#4CAF50" : "#388E3C",
-    },
-    toggleButtonTextActive: {
-      color: "#ffffff",
     },
 
     featureItem: {
