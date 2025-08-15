@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useDatabase } from "../contexts/DatabaseContext";
 import {
   useSafeAreaInsets,
   SafeAreaView,
@@ -58,6 +59,7 @@ const CalendarScreen: React.FC = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const { isDatabaseReady } = useDatabase();
   const insets = useSafeAreaInsets();
 
   // Initialize with current date using lazy initialization
@@ -177,10 +179,12 @@ const CalendarScreen: React.FC = () => {
     setSelectedDate(null);
   }, []);
 
-  // Load events on mount
+  // Load events when database is ready
   useEffect(() => {
-    loadAllEvents();
-  }, [loadAllEvents]);
+    if (isDatabaseReady) {
+      loadAllEvents();
+    }
+  }, [loadAllEvents, isDatabaseReady]);
 
   // Memoized event type color function
   const getEventTypeColor = useCallback(

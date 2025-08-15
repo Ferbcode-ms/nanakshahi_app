@@ -14,24 +14,21 @@ import {
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useDatabase } from "../contexts/DatabaseContext";
 import {
   useSafeAreaInsets,
   SafeAreaView,
 } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  initDatabase,
-  getAllEvents,
-  getEventsByType,
-  searchEvents,
-} from "../utils/database";
+import { getAllEvents, getEventsByType, searchEvents } from "../utils/database";
 import { Event } from "../types";
 
 const EventsScreen: React.FC = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const { isDatabaseReady } = useDatabase();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
@@ -41,22 +38,23 @@ const EventsScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    initializeDatabase();
-  }, []);
+    if (isDatabaseReady) {
+      loadEvents();
+    }
+  }, [isDatabaseReady]);
 
   useEffect(() => {
     filterEvents();
   }, [selectedFilter, searchQuery, allEvents]);
 
-  const initializeDatabase = async () => {
+  const loadEvents = async () => {
     try {
       setIsLoading(true);
-      await initDatabase();
       const events = await getAllEvents();
       setAllEvents(events);
       setFilteredEvents(events);
     } catch (error) {
-      console.error("Failed to initialize database:", error);
+      console.error("Failed to load events:", error);
       Alert.alert("Error", "Failed to load events from database");
     } finally {
       setIsLoading(false);

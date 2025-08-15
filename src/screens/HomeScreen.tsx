@@ -11,11 +11,10 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Audio } from "expo-av";
-import { getPrimaryStreamUrl, AUDIO_CONFIG } from "../utils/audioStreams";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useDatabase } from "../contexts/DatabaseContext";
 import {
   useSafeAreaInsets,
   SafeAreaView,
@@ -33,6 +32,7 @@ const HomeScreen: React.FC = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const { isDatabaseReady } = useDatabase();
   const insets = useSafeAreaInsets();
   const [nanakshahiDate, setNanakshahiDate] = useState<NanakshahiDate | null>(
     null
@@ -43,19 +43,7 @@ const HomeScreen: React.FC = () => {
   const [todayEvents, setTodayEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Gurbani audio state
-  const [gurbaniSound, setGurbaniSound] = useState<Audio.Sound | null>(null);
-  const [isGurbaniPlaying, setIsGurbaniPlaying] = useState(false);
-  const [isGurbaniLoading, setIsGurbaniLoading] = useState(false);
-  const [gurbaniError, setGurbaniError] = useState<string | null>(null);
-
-  useEffect(() => {
-    updateDates();
-    const interval = setInterval(updateDates, 60000); // Update every minute
-    return () => clearInterval(interval);
-  }, []);
-
-  const updateDates = async () => {
+  const updateDates = useCallback(async () => {
     try {
       const currentNanakshahi = getCurrentNanakshahiDate();
       const currentGregorian = getCurrentGregorianDate();
@@ -71,82 +59,20 @@ const HomeScreen: React.FC = () => {
       console.error("Failed to update dates and load events:", error);
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isDatabaseReady) {
+      updateDates();
+      const interval = setInterval(updateDates, 60000); // Update every minute
+      return () => clearInterval(interval);
+    }
+  }, [isDatabaseReady, updateDates]);
 
   const getMonthName = (monthNumber: number) => {
     const month = NANAKSHAHI_MONTHS.find((m) => m.number === monthNumber);
     return language === "pa" ? month?.namePunjabi : month?.name;
   };
-
-  // Initialize Gurbani audio
-  useEffect(() => {
-    const initializeGurbaniAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync(AUDIO_CONFIG.audioMode);
-      } catch (error) {
-        console.error("Error initializing Gurbani audio:", error);
-        setGurbaniError("Audio initialization failed");
-      }
-    };
-
-    initializeGurbaniAudio();
-
-    return () => {
-      if (gurbaniSound) {
-        gurbaniSound.unloadAsync();
-      }
-    };
-  }, []);
-
-  // Gurbani audio controls
-  const toggleGurbani = useCallback(async () => {
-    try {
-      if (isGurbaniPlaying) {
-        // Stop Gurbani
-        if (gurbaniSound) {
-          await gurbaniSound.stopAsync();
-          await gurbaniSound.unloadAsync();
-          setGurbaniSound(null);
-          setIsGurbaniPlaying(false);
-          setGurbaniError(null);
-        }
-      } else {
-        // Start Gurbani
-        setIsGurbaniLoading(true);
-        setGurbaniError(null);
-
-        // Unload previous sound if exists
-        if (gurbaniSound) {
-          await gurbaniSound.unloadAsync();
-        }
-
-        // Load new sound
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: getPrimaryStreamUrl() },
-          AUDIO_CONFIG.playbackOptions
-        );
-
-        setGurbaniSound(newSound);
-        setIsGurbaniPlaying(true);
-        setIsGurbaniLoading(false);
-
-        // Set up status update listener
-        newSound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded) {
-            setIsGurbaniPlaying(status.isPlaying || false);
-          } else {
-            setIsGurbaniPlaying(false);
-            setGurbaniError("Connection lost");
-          }
-        });
-      }
-    } catch (error) {
-      console.error("Error with Gurbani audio:", error);
-      setGurbaniError("Failed to connect to Golden Temple stream");
-      setIsGurbaniLoading(false);
-      setIsGurbaniPlaying(false);
-    }
-  }, [gurbaniSound, isGurbaniPlaying]);
 
   const renderEventItem = (event: Event) => {
     const getEventTypeColor = (type: string) => {
@@ -244,6 +170,8 @@ const HomeScreen: React.FC = () => {
     },
     scrollView: {
       flex: 1,
+    },
+    scrollContent: {
       padding: 20,
       paddingTop: Platform.OS === "ios" ? 20 + insets.top : 20,
       paddingBottom: Platform.OS === "ios" ? 120 + insets.bottom : 120,
@@ -370,99 +298,6 @@ const HomeScreen: React.FC = () => {
       paddingVertical: 25,
       fontWeight: "500",
     },
-    gurbaniCard: {
-      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-      shadowOpacity: 0.12,
-      shadowRadius: 6,
-      elevation: 6,
-      borderWidth: 1,
-      borderColor: theme === "dark" ? "#2a2a2a" : "#f0f0f0",
-    },
-    gurbaniHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: 12,
-    },
-    gurbaniIconContainer: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      backgroundColor: theme === "dark" ? "#2a2a2a" : "#f8f9fa",
-      justifyContent: "center",
-      alignItems: "center",
-      marginRight: 15,
-    },
-    gurbaniTextContainer: {
-      flex: 1,
-    },
-    gurbaniTitle: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: theme === "dark" ? "#ffffff" : "#1a1a1a",
-      marginBottom: 4,
-    },
-    gurbaniSubtitle: {
-      fontSize: 14,
-      color: theme === "dark" ? "#a0a0a0" : "#666666",
-      fontWeight: "500",
-    },
-    gurbaniPlayButton: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      backgroundColor: theme === "dark" ? "#4CAF50" : "#388E3C",
-      justifyContent: "center",
-      alignItems: "center",
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-    gurbaniStopButton: {
-      backgroundColor: theme === "dark" ? "#F44336" : "#D32F2F",
-    },
-    gurbaniErrorText: {
-      fontSize: 14,
-      color: theme === "dark" ? "#FF5252" : "#F44336",
-      textAlign: "center",
-      marginBottom: 8,
-      fontStyle: "italic",
-    },
-    gurbaniDescription: {
-      fontSize: 14,
-      color: theme === "dark" ? "#cccccc" : "#555555",
-      lineHeight: 20,
-      fontStyle: "italic",
-      marginBottom: 12,
-    },
-    gurbaniStatus: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    gurbaniStatusDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginRight: 8,
-    },
-    gurbaniStatusText: {
-      fontSize: 12,
-      color: theme === "dark" ? "#a0a0a0" : "#666666",
-      fontWeight: "500",
-    },
   });
 
   if (isLoading) {
@@ -487,7 +322,11 @@ const HomeScreen: React.FC = () => {
       />
       <ScrollView
         style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={true}
+        alwaysBounceVertical={false}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
           <Text style={styles.title}>
@@ -527,79 +366,6 @@ const HomeScreen: React.FC = () => {
               ? "ਅੰਤਰਰਾਸ਼ਟਰੀ ਕੈਲੰਡਰ"
               : "International Calendar"}
           </Text>
-        </View>
-
-        {/* Gurbani Card */}
-        <View style={styles.gurbaniCard}>
-          <View style={styles.gurbaniHeader}>
-            <View style={styles.gurbaniIconContainer}>
-              <MaterialIcons
-                name="music-note"
-                size={32}
-                color={theme === "dark" ? "#FFD600" : "#FF9800"}
-              />
-            </View>
-            <View style={styles.gurbaniTextContainer}>
-              <Text style={styles.gurbaniTitle}>
-                {language === "pa" ? "ਲਾਈਵ ਗੁਰਬਾਣੀ" : "Live Gurbani"}
-              </Text>
-              <Text style={styles.gurbaniSubtitle}>
-                {language === "pa"
-                  ? "ਸ੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ ਤੋਂ"
-                  : "From Golden Temple"}
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={[
-                styles.gurbaniPlayButton,
-                isGurbaniPlaying && styles.gurbaniStopButton,
-              ]}
-              onPress={toggleGurbani}
-              disabled={isGurbaniLoading}
-            >
-              {isGurbaniLoading ? (
-                <ActivityIndicator size="small" color="#ffffff" />
-              ) : (
-                <MaterialIcons
-                  name={isGurbaniPlaying ? "stop" : "play-arrow"}
-                  size={28}
-                  color="#ffffff"
-                />
-              )}
-            </TouchableOpacity>
-          </View>
-
-          {gurbaniError && (
-            <Text style={styles.gurbaniErrorText}>{gurbaniError}</Text>
-          )}
-
-          <Text style={styles.gurbaniDescription}>
-            {language === "pa"
-              ? "ਸ੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ ਤੋਂ ਲਾਈਵ ਗੁਰਬਾਣੀ ਸੁਣੋ"
-              : "Listen to live Gurbani from Sri Harmandir Sahib"}
-          </Text>
-
-          <View style={styles.gurbaniStatus}>
-            <View
-              style={[
-                styles.gurbaniStatusDot,
-                { backgroundColor: isGurbaniPlaying ? "#4CAF50" : "#9E9E9E" },
-              ]}
-            />
-            <Text style={styles.gurbaniStatusText}>
-              {isGurbaniLoading
-                ? language === "pa"
-                  ? "ਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ..."
-                  : "Connecting..."
-                : isGurbaniPlaying
-                ? language === "pa"
-                  ? "ਲਾਈਵ"
-                  : "Live"
-                : language === "pa"
-                ? "ਬੰਦ"
-                : "Stopped"}
-            </Text>
-          </View>
         </View>
 
         {/* Today's Events */}

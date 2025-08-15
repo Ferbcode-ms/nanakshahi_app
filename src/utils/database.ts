@@ -10,7 +10,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Helper function to check if cache is valid
 const isCacheValid = (): boolean => {
-  return eventsCache !== null && (Date.now() - cacheTimestamp) < CACHE_DURATION;
+  return eventsCache !== null && Date.now() - cacheTimestamp < CACHE_DURATION;
 };
 
 // Helper function to invalidate cache
@@ -21,11 +21,12 @@ const invalidateCache = (): void => {
 
 export const initDatabase = async (): Promise<void> => {
   try {
-    const existingEvents = await AsyncStorage.getItem(EVENTS_STORAGE_KEY);
-    if (!existingEvents) {
-      // Database is ready, no need to create tables
-      console.log("Database initialized successfully");
-    }
+    // Ensure AsyncStorage is available and working
+    const testKey = "test_storage";
+    await AsyncStorage.setItem(testKey, "test");
+    await AsyncStorage.removeItem(testKey);
+
+    console.log("Database initialized successfully");
   } catch (error) {
     console.error("Database initialization error:", error);
     throw error;
@@ -37,11 +38,11 @@ export const insertEvent = async (event: Event): Promise<void> => {
     const existingEvents = await getAllEvents();
     const updatedEvents = existingEvents.filter((e) => e.id !== event.id);
     updatedEvents.push(event);
-    
+
     // Update cache immediately
     eventsCache = updatedEvents;
     cacheTimestamp = Date.now();
-    
+
     await AsyncStorage.setItem(
       EVENTS_STORAGE_KEY,
       JSON.stringify(updatedEvents)
@@ -63,11 +64,11 @@ export const getAllEvents = async (): Promise<Event[]> => {
 
     const events = await AsyncStorage.getItem(EVENTS_STORAGE_KEY);
     const parsedEvents = events ? JSON.parse(events) : [];
-    
+
     // Update cache
     eventsCache = parsedEvents;
     cacheTimestamp = Date.now();
-    
+
     return parsedEvents;
   } catch (error) {
     console.error("Get all events error:", error);
@@ -85,6 +86,12 @@ export const getEventsForDate = async (date: {
   try {
     const allEvents = await getAllEvents();
     return allEvents.filter((event) => {
+      // For recurring events, only check day and month
+      if (event.isRecurring) {
+        return event.date.day === date.day && event.date.month === date.month;
+      }
+
+      // For non-recurring events, check year if provided
       if (date.year) {
         return (
           event.date.day === date.day &&
@@ -92,6 +99,7 @@ export const getEventsForDate = async (date: {
           event.date.year === date.year
         );
       }
+
       return event.date.day === date.day && event.date.month === date.month;
     });
   } catch (error) {
@@ -154,21 +162,21 @@ export const resetDatabase = async (): Promise<void> => {
 export const insertMultipleEvents = async (events: Event[]): Promise<void> => {
   try {
     const existingEvents = await getAllEvents();
-    const existingIds = new Set(existingEvents.map(e => e.id));
-    
+    const existingIds = new Set(existingEvents.map((e) => e.id));
+
     // Filter out events that already exist
-    const newEvents = events.filter(event => !existingIds.has(event.id));
-    
+    const newEvents = events.filter((event) => !existingIds.has(event.id));
+
     if (newEvents.length === 0) {
       return; // No new events to insert
     }
-    
+
     const updatedEvents = [...existingEvents, ...newEvents];
-    
+
     // Update cache immediately
     eventsCache = updatedEvents;
     cacheTimestamp = Date.now();
-    
+
     await AsyncStorage.setItem(
       EVENTS_STORAGE_KEY,
       JSON.stringify(updatedEvents)
@@ -190,12 +198,15 @@ export const getEventsForDateRange = async (
     const allEvents = await getAllEvents();
     return allEvents.filter((event) => {
       const eventDate = event.date;
-      
+
       // Convert dates to comparable numbers for easier comparison
-      const eventDateNum = eventDate.year * 10000 + eventDate.month * 100 + eventDate.day;
-      const startDateNum = startDate.year * 10000 + startDate.month * 100 + startDate.day;
-      const endDateNum = endDate.year * 10000 + endDate.month * 100 + endDate.day;
-      
+      const eventDateNum =
+        eventDate.year * 10000 + eventDate.month * 100 + eventDate.day;
+      const startDateNum =
+        startDate.year * 10000 + startDate.month * 100 + startDate.day;
+      const endDateNum =
+        endDate.year * 10000 + endDate.month * 100 + endDate.day;
+
       return eventDateNum >= startDateNum && eventDateNum <= endDateNum;
     });
   } catch (error) {

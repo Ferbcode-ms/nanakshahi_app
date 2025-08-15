@@ -3,13 +3,14 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import { LanguageProvider } from "./src/contexts/LanguageContext";
+import { DatabaseProvider } from "./src/contexts/DatabaseContext";
 import { View, Text, ActivityIndicator } from "react-native";
 import "./src/i18n"; // Import i18n configuration
 
 // Lazy load components for better performance and smaller initial bundle
 const AppNavigator = React.lazy(() => import("./src/navigation/AppNavigator"));
-const DatabaseInitializer = React.lazy(
-  () => import("./src/components/DatabaseInitializer")
+const DatabaseLoadingScreen = React.lazy(
+  () => import("./src/components/DatabaseLoadingScreen")
 );
 
 // Loading component for Suspense fallback
@@ -34,11 +35,13 @@ export default function App() {
     <SafeAreaProvider>
       <ThemeProvider>
         <LanguageProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <DatabaseInitializer />
-            <AppNavigator />
-            <StatusBar style="auto" />
-          </Suspense>
+          <DatabaseProvider>
+            <Suspense fallback={<LoadingFallback />}>
+              <DatabaseLoadingScreen />
+              <AppNavigator />
+              <StatusBar style="auto" />
+            </Suspense>
+          </DatabaseProvider>
         </LanguageProvider>
       </ThemeProvider>
     </SafeAreaProvider>
