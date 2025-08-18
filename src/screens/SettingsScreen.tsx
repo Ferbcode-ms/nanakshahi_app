@@ -30,8 +30,7 @@ const SettingsScreen: React.FC = () => {
   const buildNumber = "1";
 
   // Donation and contact links
-  const instaLink =
-    "https://www.instagram.com/ferbcode.ms?igsh=MWloNHF3d3hhZ3luNg==";
+  const instaLink = "https://www.instagram.com/ferbcode.ms";
   const gumroadLink = "https://ferbcode.gumroad.com/l/wjlfpt";
 
   // Memoized styles to prevent recreation

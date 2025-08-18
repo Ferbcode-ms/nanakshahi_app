@@ -389,12 +389,16 @@ const CalendarScreen: React.FC = () => {
         const dayEvents = getEventsForDay(day, currentMonth, currentYear);
         const hasEvents = dayEvents.length > 0;
 
-        // Determine cell style based on events
+        // Determine cell style based on events and current date
         const cellStyle = [
           styles.dayCell,
           isSelected && styles.selectedDay,
+          // Current date styling - always green
           isToday && styles.todayCell,
+          // Event styling - if has events and is current date, add orange border
+          hasEvents && isToday && styles.todayWithEvents,
           hasEvents &&
+            !isToday &&
             (() => {
               const hasGurpurab = dayEvents.some(
                 (event) =>
@@ -531,18 +535,34 @@ const CalendarScreen: React.FC = () => {
             {language === "pa" ? "ਇਤਿਹਾਸਿਕ" : "Historical"}
           </Text>
         </View>
+
         <View style={styles.legendItem}>
           <View
             style={[
               styles.legendBox,
               {
-                backgroundColor: theme === "dark" ? "#3a3a3a" : "#f8f9fa",
-                borderColor: theme === "dark" ? "#4a4a4a" : "#e0e0e0",
+                backgroundColor: theme === "dark" ? "#4CAF50" : "#E8F5E8",
+                borderColor: theme === "dark" ? "#4CAF50" : "#4CAF50",
               },
             ]}
           />
           <Text style={styles.legendText}>
-            {language === "pa" ? "ਹੋਰ" : "Other"}
+            {language === "pa" ? "ਆਜ ਦਾ ਦਿਨ" : "Today"}
+          </Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View
+            style={[
+              styles.legendBox,
+              {
+                backgroundColor: theme === "dark" ? "#4CAF50" : "#E8F5E8",
+                borderColor: theme === "dark" ? "#FF9800" : "#FF9800",
+                borderWidth: 2,
+              },
+            ]}
+          />
+          <Text style={styles.legendText}>
+            {language === "pa" ? "ਆਜ + ਘਟਨਾ" : "Today + Event"}
           </Text>
         </View>
       </View>
@@ -798,6 +818,16 @@ const createStyles = (theme: "light" | "dark") =>
       borderColor: theme === "dark" ? "#4caf50" : "#4caf50",
       borderWidth: 2,
     },
+    todayWithEvents: {
+      backgroundColor: theme === "dark" ? "#4CAF50" : "#E8F5E8",
+      borderColor: theme === "dark" ? "#FF9800" : "#FF9800",
+      borderWidth: 3,
+      shadowColor: theme === "dark" ? "#FF9800" : "#FF9800",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.5,
+      shadowRadius: 8,
+      elevation: 6,
+    },
     emptyDayCell: {
       width: "14.28%",
       aspectRatio: 1,
@@ -828,16 +858,16 @@ const createStyles = (theme: "light" | "dark") =>
       fontWeight: "700",
     },
     todayCell: {
-      backgroundColor: theme === "dark" ? "#FF9800" : "#FFF3E0",
-      borderColor: theme === "dark" ? "#FF9800" : "#FFB74D",
-      shadowColor: theme === "dark" ? "#FF9800" : "#FF9800",
+      backgroundColor: theme === "dark" ? "#4CAF50" : "#E8F5E8",
+      borderColor: theme === "dark" ? "#4CAF50" : "#4CAF50",
+      shadowColor: theme === "dark" ? "#4CAF50" : "#4CAF50",
       shadowOffset: { width: 0, height: 3 },
       shadowOpacity: 0.4,
       shadowRadius: 6,
       elevation: 4,
     },
     todayText: {
-      color: theme === "dark" ? "#ffffff" : "#E65100",
+      color: theme === "dark" ? "#ffffff" : "#2E7D32",
       fontWeight: "700",
     },
     gregorianDateText: {
@@ -973,6 +1003,7 @@ const createStyles = (theme: "light" | "dark") =>
       flexDirection: "row",
       justifyContent: "space-around",
       marginBottom: 16,
+      gap: 10,
       paddingHorizontal: 10,
     },
     legendItem: {
